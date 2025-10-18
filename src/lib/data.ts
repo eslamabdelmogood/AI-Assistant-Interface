@@ -30,9 +30,9 @@ const generateHistory = (base: number, deviation: number, points: number) => {
 
 export const equipments: Equipment[] = [
   {
-    id: 'turbine-001',
-    name: 'Turbine-001',
-    type: 'Gas Turbine',
+    id: 'cnc-001',
+    name: 'CNC Machine-001',
+    type: '5-Axis Mill',
     status: 'Operational',
     sensors: [
       { name: 'Temperature', value: 75, unit: '°C', history: generateHistory(70, 10, 12) },
@@ -41,7 +41,7 @@ export const equipments: Equipment[] = [
     ],
     maintenanceLog: [
       { id: 'maint-1', date: '2024-06-15', description: 'Annual inspection', status: 'Completed' },
-      { id: 'maint-2', date: '2024-03-20', description: 'Filter replacement', status: 'Completed' },
+      { id: 'maint-2', date: '2024-03-20', description: 'Coolant flush', status: 'Completed' },
       { id: 'maint-3', date: '2024-07-28', description: 'Software update', status: 'Scheduled' },
     ],
   },

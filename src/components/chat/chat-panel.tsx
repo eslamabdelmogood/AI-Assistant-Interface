@@ -25,7 +25,7 @@ export default function ChatPanel({ selectedEquipment, setSelectedEquipment, set
     {
       id: 'init',
       role: 'assistant',
-      content: "Hello! I'm the Green Assistant. How can I help you with the Green Box network today? You can ask for equipment status, maintenance reports, or diagnostics.",
+      content: "Hello! I'm Factory AI. How can I help you with your factory equipment today? You can ask for equipment status, maintenance reports, or diagnostics.",
     },
   ]);
   const [input, setInput] = useState('');

@@ -6,7 +6,7 @@ export default function Header() {
     <header className="flex h-16 shrink-0 items-center justify-between border-b border-border bg-card px-4 md:px-6">
       <div className="flex items-center gap-3">
         <Logo />
-        <h1 className="text-lg font-semibold tracking-wider text-foreground">Green Assistant</h1>
+        <h1 className="text-lg font-semibold tracking-wider text-foreground">Factory AI</h1>
       </div>
       <Avatar className="h-9 w-9">
         <AvatarImage src="https://picsum.photos/seed/engineer/40/40" data-ai-hint="person portrait" />
