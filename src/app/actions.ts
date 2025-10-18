@@ -41,7 +41,8 @@ export async function getSpeech(input: TextToSpeechInput) {
     const result = await textToSpeech(input);
     return { success: true, data: result };
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to generate speech.';
     console.error(error);
-    return { success: false, error: 'Failed to generate speech.' };
+    return { success: false, error: errorMessage };
   }
 }
