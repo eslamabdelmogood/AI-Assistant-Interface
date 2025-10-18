@@ -1,7 +1,32 @@
 import Image from 'next/image';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { Drone, Clock } from 'lucide-react';
+import { Clock } from 'lucide-react';
+
+const Drone = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
+    >
+      <path d="M12 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z"/>
+      <path d="M12 3v2"/>
+      <path d="M12 19v2"/>
+      <path d="m21 12-2 0"/>
+      <path d="m5 12-2 0"/>
+      <path d="M19.07 4.93-1.41-1.41"/>
+      <path d="M19.07 19.07-1.41-1.41"/>
+      <path d="M4.93 19.07l1.41-1.41"/>
+      <path d="M4.93 4.93l1.41 1.41"/>
+    </svg>
+  );
 
 export default function DroneDispatchMap() {
   const mapImage = PlaceHolderImages.find(img => img.id === 'drone-map');
