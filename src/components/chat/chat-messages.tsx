@@ -55,7 +55,7 @@ export default function ChatMessages({ messages, isLoading, currentlyPlayingId, 
             </div>
              {message.role === 'user' && (
               <Avatar className="h-9 w-9 border border-border">
-                <AvatarFallback>EN</AvatarFallback>
+                <AvatarFallback>E</AvatarFallback>
               </Avatar>
             )}
           </div>

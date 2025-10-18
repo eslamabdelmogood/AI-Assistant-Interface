@@ -10,7 +10,7 @@ export default function Header() {
       </div>
       <Avatar className="h-9 w-9">
         <AvatarImage src="https://picsum.photos/seed/engineer/40/40" data-ai-hint="person portrait" />
-        <AvatarFallback>EN</AvatarFallback>
+        <AvatarFallback>E</AvatarFallback>
       </Avatar>
     </header>
   );
