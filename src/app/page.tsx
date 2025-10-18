@@ -5,7 +5,7 @@ import DashboardPanel from '@/components/dashboard/dashboard-panel';
 import Header from '@/components/layout/header';
 import { type Equipment, equipments } from '@/lib/data';
 
-export type View = 'dashboard' | 'report' | 'order' | 'drone';
+export type View = 'dashboard' | 'report' | 'order' | 'drone' | 'find-bag';
 
 export default function Home() {
   const [selectedEquipment, setSelectedEquipment] = useState<Equipment | null>(equipments[0]);
@@ -23,7 +23,7 @@ export default function Home() {
           />
         </div>
         <div className="hidden md:flex flex-1 flex-col">
-          <DashboardPanel equipment={selectedEquipment} view={dashboardView} />
+          <DashboardPanel equipment={selectedEquipment} view={dashboardView} setDashboardView={setDashboardView} />
         </div>
       </main>
     </div>

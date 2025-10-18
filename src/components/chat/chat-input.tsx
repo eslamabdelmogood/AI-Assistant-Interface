@@ -1,13 +1,13 @@
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Mic, Send, Square } from 'lucide-react';
+import { Briefcase, Mic, Send, Square } from 'lucide-react';
 import { Textarea } from '../ui/textarea';
 import { useRef, useEffect } from 'react';
 
 type ChatInputProps = {
   input: string;
   setInput: (value: string) => void;
-  handleSendMessage: (e: React.FormEvent) => Promise<void>;
+  handleSendMessage: (e: React.FormEvent, message?: string) => Promise<void>;
   isLoading: boolean;
   isRecording: boolean;
   toggleRecording: () => void;
@@ -29,6 +29,10 @@ export default function ChatInput({ input, setInput, handleSendMessage, isLoadin
       handleSendMessage(e as any);
     }
   };
+  
+  const handleFindBag = (e: React.FormEvent) => {
+    handleSendMessage(e, 'Find my smart bag');
+  }
 
   return (
     <div className="border-t border-border p-4 bg-card">
@@ -39,12 +43,22 @@ export default function ChatInput({ input, setInput, handleSendMessage, isLoadin
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Ask about equipment status, reports, or parts..."
-          className="flex-1 resize-none overflow-hidden pr-20 py-2.5 min-h-[44px] max-h-48"
+          className="flex-1 resize-none overflow-hidden pr-28 py-2.5 min-h-[44px] max-h-48"
           rows={1}
           disabled={isLoading}
         />
         <div className="absolute inset-y-0 right-2 flex items-end pb-1.5">
             <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button type="button" size="icon" variant="ghost" className="text-muted-foreground hover:text-foreground" disabled={isLoading} onClick={handleFindBag}>
+                    <Briefcase className="h-5 w-5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Find my smart bag</p>
+                </TooltipContent>
+              </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button type="button" size="icon" variant="ghost" className="text-muted-foreground hover:text-foreground" disabled={isLoading} onClick={toggleRecording}>

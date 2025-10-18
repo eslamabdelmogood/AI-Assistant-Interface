@@ -45,11 +45,7 @@ export default function ChatPanel({ selectedEquipment, setSelectedEquipment, set
 
       recognitionRef.current.onresult = (event: any) => {
         const transcript = event.results[0][0].transcript;
-        setInput(transcript);
-        const form = document.querySelector('form');
-        if (form) {
-            form.requestSubmit();
-        }
+        handleSendMessage(new Event('submit') as any, transcript);
       };
 
       recognitionRef.current.onerror = (event: any) => {
@@ -94,11 +90,11 @@ export default function ChatPanel({ selectedEquipment, setSelectedEquipment, set
     setMessages(prev => [...prev, newMessage]);
   };
 
-  const handleSendMessage = async (e: React.FormEvent) => {
+  const handleSendMessage = async (e: React.FormEvent, message?: string) => {
     e.preventDefault();
-    if (!input.trim() || isLoading) return;
+    const userInput = message || input;
+    if (!userInput.trim() || isLoading) return;
 
-    const userInput = input;
     addMessage('user', userInput);
     setInput('');
     setIsLoading(true);
@@ -114,6 +110,11 @@ export default function ChatPanel({ selectedEquipment, setSelectedEquipment, set
 
       const assistantMessageId = crypto.randomUUID();
       addMessage('assistant', response, assistantMessageId);
+      
+      if (action === 'find-bag') {
+        setDashboardView('find-bag');
+        return;
+      }
       
       const equipmentToUse = targetEquipment ? equipments.find(e => e.id === targetEquipment.id) : selectedEquipment;
 

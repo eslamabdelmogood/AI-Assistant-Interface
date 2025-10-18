@@ -5,14 +5,16 @@ import SensorDataChart from './sensor-data-chart';
 import MaintenanceLog from './maintenance-log';
 import DroneDispatchMap from './drone-dispatch-map';
 import type { View } from '@/app/page';
+import FindMyBag from './find-my-bag';
 
 type DashboardPanelProps = {
   equipment: Equipment | null;
   view: View;
+  setDashboardView: (view: View) => void;
 };
 
-export default function DashboardPanel({ equipment, view }: DashboardPanelProps) {
-  if (!equipment) {
+export default function DashboardPanel({ equipment, view, setDashboardView }: DashboardPanelProps) {
+  if (!equipment && view !== 'find-bag') {
     return (
       <div className="flex h-full items-center justify-center bg-muted/50 p-6">
         <div className="text-center">
@@ -26,16 +28,16 @@ export default function DashboardPanel({ equipment, view }: DashboardPanelProps)
   const renderContent = () => {
     switch(view) {
       case 'dashboard':
-        return (
+        return equipment ? (
           <>
             <EquipmentStatusCard equipment={equipment} />
             <SensorDataChart sensors={equipment.sensors} />
           </>
-        );
+        ) : null;
       case 'report':
-        return <MaintenanceLog equipment={equipment} />;
+        return equipment ? <MaintenanceLog equipment={equipment} /> : null;
       case 'order':
-        return (
+        return equipment ? (
             <Card>
                 <CardHeader>
                     <CardTitle>Order Status</CardTitle>
@@ -47,11 +49,13 @@ export default function DashboardPanel({ equipment, view }: DashboardPanelProps)
                     <p className="mt-4 text-accent">Ready for pickup.</p>
                 </CardContent>
             </Card>
-        )
+        ) : null;
       case 'drone':
         return <DroneDispatchMap />;
+      case 'find-bag':
+        return <FindMyBag setDashboardView={setDashboardView} />;
       default:
-        return <EquipmentStatusCard equipment={equipment} />;
+        return equipment ? <EquipmentStatusCard equipment={equipment} /> : null;
     }
   }
 
