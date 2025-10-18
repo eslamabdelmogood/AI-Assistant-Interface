@@ -4,6 +4,17 @@ import { getPredictiveMaintenanceInsights, type PredictiveMaintenanceInsightsInp
 import { getRealTimeDiagnostics, type RealTimeDiagnosticsInput } from '@/ai/flows/real-time-diagnostics-from-sensor-data';
 import { textToSpeech } from '@/ai/flows/text-to-speech';
 import { TextToSpeechInput } from '@/ai/schemas/text-to-speech-schemas';
+import { conversationalResponse, type ConversationalResponseInput } from '@/ai/flows/conversational-response';
+
+export async function getConversationalResponse(input: ConversationalResponseInput) {
+    try {
+      const result = await conversationalResponse(input);
+      return { success: true, data: result };
+    } catch (error) {
+      console.error(error);
+      return { success: false, error: 'Failed to get conversational response.' };
+    }
+}
 
 export async function getDiagnostics(input: RealTimeDiagnosticsInput) {
   try {
