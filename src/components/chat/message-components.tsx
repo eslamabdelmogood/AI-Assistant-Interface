@@ -6,6 +6,9 @@ import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import type { View } from '@/app/page';
 import { cn } from '@/lib/utils';
+import Image from 'next/image';
+import type { VisualExplanationOutput } from '@/ai/schemas/visual-explanation-schemas';
+
 
 export function MaintenanceReport({ equipment }: { equipment: Equipment }) {
   return (
@@ -61,13 +64,18 @@ export function DroneDispatchConfirmation() {
     );
 }
 
-export function Soundwave({ isPlaying }: { isPlaying: boolean }) {
-    return (
-      <div className="flex items-center justify-center w-4 h-4">
-        <span className={cn('w-0.5 h-1 bg-current transition-all duration-300', isPlaying ? 'h-3 animate-[wave_1s_ease-in-out_infinite] delay-0' : 'h-1')} />
-        <span className={cn('w-0.5 h-1 bg-current transition-all duration-300 ml-0.5', isPlaying ? 'h-4 animate-[wave_1s_ease-in-out_infinite] delay-200' : 'h-2')} />
-        <span className={cn('w-0.5 h-1 bg-current transition-all duration-300 ml-0.5', isPlaying ? 'h-2.5 animate-[wave_1s_ease-in-out_infinite] delay-400' : 'h-1')} />
-        <span className={cn('w-0.5 h-1 bg-current transition-all duration-300 ml-0.5', isPlaying ? 'h-3.5 animate-[wave_1s_ease-in-out_infinite] delay-600' : 'h-1.5')} />
+export function VisualExplanation({ explanation }: { explanation: VisualExplanationOutput }) {
+  return (
+    <div className="space-y-3">
+      <div className="relative aspect-video w-full overflow-hidden rounded-lg border">
+        <Image
+          src={explanation.imageUrl}
+          alt="Visual Explanation"
+          fill
+          className="object-contain"
+        />
       </div>
-    );
-  }
+      <p className="text-sm">{explanation.description}</p>
+    </div>
+  );
+}

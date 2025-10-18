@@ -20,7 +20,8 @@ export type ConversationalResponseInput = z.infer<typeof ConversationalResponseI
 
 const ConversationalResponseOutputSchema = z.object({
   response: z.string().describe('The conversational response to the user.'),
-  action: z.enum(['diagnostics', 'insights', 'report', 'order', 'drone', 'status', 'find-bag', 'none']).optional().describe('The suggested action to take.'),
+  action: z.enum(['diagnostics', 'insights', 'report', 'order', 'drone', 'status', 'find-bag', 'explanation', 'none']).optional().describe('The suggested action to take.'),
+  actionTopic: z.string().optional().describe('The topic for the action, e.g., what to explain.'),
   targetEquipment: z.object({
     id: z.string(),
     name: z.string(),
@@ -65,7 +66,8 @@ const prompt = ai.definePrompt({
   Available equipment: ${equipmentList}.
   If the user asks about equipment not on the list, say you don't have information about it.
   If the user mentions a piece of equipment, identify it and set it as targetEquipment.
-  Based on the user's input, determine if they are requesting one of the following actions: 'diagnostics', 'insights', 'report', 'order', 'drone', 'status', 'find-bag'.
+  Based on the user's input, determine if they are requesting one of the following actions: 'diagnostics', 'insights', 'report', 'order', 'drone', 'status', 'find-bag', 'explanation'.
+  If the user asks to 'show', 'explain', 'diagram', 'illustrate', or 'describe the structure of' something, the action should be 'explanation'. Set the 'actionTopic' to what the user wants explained.
   If the user says 'find my bag' or similar, the action should be 'find-bag'.
   If no specific action is requested, the action should be 'none'.
   `,

@@ -1,11 +1,11 @@
 'use client';
 import { useState, useRef, useEffect, type Dispatch, type SetStateAction } from 'react';
-import { getConversationalResponse } from '@/app/actions';
+import { getConversationalResponse, explain } from '@/app/actions';
 import ChatMessages from './chat-messages';
 import ChatInput from './chat-input';
 import { type Equipment, equipments } from '@/lib/data';
 import { useToast } from '@/hooks/use-toast';
-import { MaintenanceReport, OrderParts, DroneDispatchConfirmation } from './message-components';
+import { MaintenanceReport, OrderParts, DroneDispatchConfirmation, VisualExplanation } from './message-components';
 import type { View } from '@/app/page';
 
 export type Message = {
@@ -89,6 +89,19 @@ export default function ChatPanel({ selectedEquipment, setSelectedEquipment, set
     const newMessage = { id: id || crypto.randomUUID(), role, content };
     setMessages(prev => [...prev, newMessage]);
   };
+  
+  const handleExplanation = async (topic: string) => {
+    const tempId = crypto.randomUUID();
+    addMessage('assistant', <div className="p-3 text-sm bg-muted flex items-center space-x-2">Generating explanation...</div>, tempId);
+
+    const res = await explain({ topic });
+    if (res.success && res.data) {
+      setMessages(prev => prev.map(m => m.id === tempId ? { ...m, content: <VisualExplanation explanation={res.data} /> } : m));
+    } else {
+      const errorContent = `Sorry, I failed to create an explanation. ${res.error || ''}`;
+      setMessages(prev => prev.map(m => m.id === tempId ? { ...m, content: errorContent } : m));
+    }
+  };
 
   const handleSendMessage = async (e: React.FormEvent, message?: string) => {
     e.preventDefault();
@@ -106,19 +119,22 @@ export default function ChatPanel({ selectedEquipment, setSelectedEquipment, set
         throw new Error(res.error || 'Failed to get a response.');
       }
       
-      const { response, action, targetEquipment } = res.data;
+      const { response, action, targetEquipment, actionTopic } = res.data;
 
       const assistantMessageId = crypto.randomUUID();
       addMessage('assistant', response, assistantMessageId);
       
       if (action === 'find-bag') {
         setDashboardView('find-bag');
+        setIsLoading(false);
         return;
       }
       
       const equipmentToUse = targetEquipment ? equipments.find(e => e.id === targetEquipment.id) : selectedEquipment;
 
-      if (equipmentToUse) {
+      if (action === 'explanation' && actionTopic) {
+        await handleExplanation(actionTopic);
+      } else if (equipmentToUse) {
         setSelectedEquipment(equipmentToUse);
         switch (action) {
           case 'report':
