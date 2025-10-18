@@ -1,0 +1,68 @@
+import { type Message } from './chat-panel';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { cn } from '@/lib/utils';
+import Logo from '../icons/logo';
+import { useEffect, useRef } from 'react';
+
+type ChatMessagesProps = {
+  messages: Message[];
+  isLoading: boolean;
+};
+
+export default function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (scrollAreaRef.current) {
+      scrollAreaRef.current.scrollTo({ top: scrollAreaRef.current.scrollHeight, behavior: 'smooth' });
+    }
+  }, [messages, isLoading]);
+
+  return (
+    <ScrollArea className="flex-1" ref={scrollAreaRef}>
+      <div className="p-4 md:p-6 space-y-6">
+        {messages.map((message) => (
+          <div key={message.id} className={cn("flex items-start gap-4", message.role === 'user' && "justify-end")}>
+            {message.role === 'assistant' && (
+              <Avatar className="h-9 w-9 border border-border">
+                <AvatarFallback className="bg-primary/10">
+                  <Logo className="h-6 w-6" />
+                </AvatarFallback>
+              </Avatar>
+            )}
+            <div
+              className={cn(
+                "max-w-md rounded-lg p-3 text-sm",
+                message.role === 'user'
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted"
+              )}
+            >
+              {message.content}
+            </div>
+             {message.role === 'user' && (
+              <Avatar className="h-9 w-9 border border-border">
+                <AvatarFallback>EN</AvatarFallback>
+              </Avatar>
+            )}
+          </div>
+        ))}
+        {isLoading && (
+          <div className="flex items-start gap-4">
+             <Avatar className="h-9 w-9 border border-border">
+                <AvatarFallback className="bg-primary/10">
+                  <Logo className="h-6 w-6" />
+                </AvatarFallback>
+              </Avatar>
+            <div className="max-w-md rounded-lg p-3 bg-muted flex items-center space-x-2">
+                <span className="h-2 w-2 bg-foreground/50 rounded-full animate-pulse delay-0"></span>
+                <span className="h-2 w-2 bg-foreground/50 rounded-full animate-pulse delay-200"></span>
+                <span className="h-2 w-2 bg-foreground/50 rounded-full animate-pulse delay-400"></span>
+            </div>
+          </div>
+        )}
+      </div>
+    </ScrollArea>
+  );
+}
