@@ -4,13 +4,18 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import Logo from '../icons/logo';
 import { useEffect, useRef } from 'react';
+import AudioPlayer from './audio-player';
+import { Soundwave } from './message-components';
+
 
 type ChatMessagesProps = {
   messages: Message[];
   isLoading: boolean;
+  currentlyPlayingId: string | null;
+  setCurrentlyPlayingId: (id: string | null) => void;
 };
 
-export default function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
+export default function ChatMessages({ messages, isLoading, currentlyPlayingId, setCurrentlyPlayingId }: ChatMessagesProps) {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -39,7 +44,14 @@ export default function ChatMessages({ messages, isLoading }: ChatMessagesProps)
                   : "bg-muted"
               )}
             >
-              {message.content}
+              {typeof message.content === 'string' && message.role === 'assistant' && (
+                 <button onClick={() => setCurrentlyPlayingId(currentlyPlayingId === message.id ? null : message.id)} className="flex items-center gap-2 text-left">
+                  <Soundwave isPlaying={currentlyPlayingId === message.id} />
+                  {message.content}
+                </button>
+              )}
+               {typeof message.content !== 'string' && message.content}
+               {typeof message.content === 'string' && message.role === 'user' && message.content}
             </div>
              {message.role === 'user' && (
               <Avatar className="h-9 w-9 border border-border">
@@ -63,6 +75,16 @@ export default function ChatMessages({ messages, isLoading }: ChatMessagesProps)
           </div>
         )}
       </div>
+      {messages
+        .filter(m => m.role === 'assistant' && typeof m.content === 'string')
+        .map(message => (
+            <AudioPlayer
+                key={message.id}
+                text={message.content as string}
+                isPlaying={currentlyPlayingId === message.id}
+                onPlaybackEnd={() => setCurrentlyPlayingId(null)}
+            />
+        ))}
     </ScrollArea>
   );
 }

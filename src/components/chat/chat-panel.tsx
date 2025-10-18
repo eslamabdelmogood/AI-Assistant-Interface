@@ -30,16 +30,80 @@ export default function ChatPanel({ selectedEquipment, setSelectedEquipment, set
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [currentlyPlayingId, setCurrentlyPlayingId] = useState<string | null>('init');
   const { toast } = useToast();
+  const [isRecording, setIsRecording] = useState(false);
+  const recognitionRef = useRef<any>(null);
+
+  useEffect(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = false;
+      recognitionRef.current.interimResults = false;
+      recognitionRef.current.lang = 'en-US';
+
+      recognitionRef.current.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        setInput(transcript);
+        // Automatically submit after transcription
+        // Use a form element reference to submit to trigger handleSendMessage
+        const form = document.querySelector('form');
+        if (form) {
+            form.requestSubmit();
+        }
+      };
+
+      recognitionRef.current.onerror = (event: any) => {
+        console.error('Speech recognition error:', event.error);
+        toast({
+          variant: 'destructive',
+          title: 'Speech Recognition Error',
+          description: event.error,
+        });
+        setIsRecording(false);
+      };
+
+      recognitionRef.current.onend = () => {
+        setIsRecording(false);
+      };
+    } else {
+      console.warn('Speech recognition not supported in this browser.');
+    }
+  }, [toast]);
+  
+  const toggleRecording = () => {
+    if (!recognitionRef.current) {
+        toast({
+            variant: "destructive",
+            title: "Not supported",
+            description: "Speech recognition is not supported in this browser.",
+          });
+        return;
+    };
+
+    if (isRecording) {
+      recognitionRef.current.stop();
+      setIsRecording(false);
+    } else {
+      recognitionRef.current.start();
+      setIsRecording(true);
+    }
+  };
 
   const addMessage = (role: 'user' | 'assistant', content: React.ReactNode) => {
-    setMessages(prev => [...prev, { id: crypto.randomUUID(), role, content }]);
+    const newMessage = { id: crypto.randomUUID(), role, content };
+    setMessages(prev => [...prev, newMessage]);
+    if (role === 'assistant' && typeof content === 'string') {
+        setCurrentlyPlayingId(newMessage.id);
+    }
   };
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
 
+    setCurrentlyPlayingId(null);
     const userInput = input;
     addMessage('user', userInput);
     setInput('');
@@ -124,8 +188,8 @@ export default function ChatPanel({ selectedEquipment, setSelectedEquipment, set
 
   return (
     <div className="flex h-full flex-col bg-card">
-      <ChatMessages messages={messages} isLoading={isLoading} />
-      <ChatInput input={input} setInput={setInput} handleSendMessage={handleSendMessage} isLoading={isLoading} />
+      <ChatMessages messages={messages} isLoading={isLoading} currentlyPlayingId={currentlyPlayingId} setCurrentlyPlayingId={setCurrentlyPlayingId} />
+      <ChatInput input={input} setInput={setInput} handleSendMessage={handleSendMessage} isLoading={isLoading} isRecording={isRecording} toggleRecording={toggleRecording} />
     </div>
   );
 }

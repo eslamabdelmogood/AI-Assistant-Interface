@@ -18,6 +18,8 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+        <script src="https://cdn.jsdelivr.net/npm/regenerator-runtime@0.13.11/runtime.js" async></script>
+        <script src="https://cdn.jsdelivr.net/npm/react-speech-recognition@3.10.0/lib/index.min.js" async></script>
       </head>
       <body className="font-body antialiased">
         {children}
