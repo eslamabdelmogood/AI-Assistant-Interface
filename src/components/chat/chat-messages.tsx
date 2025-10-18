@@ -6,16 +6,13 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import Logo from '../icons/logo';
 import { useEffect, useRef } from 'react';
-import { Soundwave } from './message-components';
 
 type ChatMessagesProps = {
   messages: Message[];
   isLoading: boolean;
-  currentlyPlayingId: string | null;
-  togglePlayback: (messageId: string, text: string) => void;
 };
 
-export default function ChatMessages({ messages, isLoading, currentlyPlayingId, togglePlayback }: ChatMessagesProps) {
+export default function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -44,13 +41,7 @@ export default function ChatMessages({ messages, isLoading, currentlyPlayingId, 
                   : "bg-muted"
               )}
             >
-              {typeof message.content === 'string' && message.role === 'assistant' ? (
-                 <button onClick={() => togglePlayback(message.id, message.content as string)} className="flex items-center gap-2 text-left">
-                  <Soundwave isPlaying={currentlyPlayingId === message.id} />
-                  {message.content}
-                </button>
-              ) : message.content }
-               {typeof message.content === 'string' && message.role === 'user' && message.content}
+              {message.content}
             </div>
              {message.role === 'user' && (
               <Avatar className="h-9 w-9 border border-border">

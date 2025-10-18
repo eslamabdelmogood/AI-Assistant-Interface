@@ -2,8 +2,6 @@
 
 import { getPredictiveMaintenanceInsights, type PredictiveMaintenanceInsightsInput } from '@/ai/flows/predictive-maintenance-insights';
 import { getRealTimeDiagnostics, type RealTimeDiagnosticsInput } from '@/ai/flows/real-time-diagnostics-from-sensor-data';
-import { textToSpeech } from '@/ai/flows/text-to-speech';
-import { TextToSpeechInput } from '@/ai/schemas/text-to-speech-schemas';
 import { conversationalResponse, type ConversationalResponseInput } from '@/ai/flows/conversational-response';
 
 export async function getConversationalResponse(input: ConversationalResponseInput) {
@@ -33,16 +31,5 @@ export async function getInsights(input: PredictiveMaintenanceInsightsInput) {
   } catch (error) {
     console.error(error);
     return { success: false, error: 'Failed to get predictive insights.' };
-  }
-}
-
-export async function getSpeech(input: TextToSpeechInput) {
-  try {
-    const result = await textToSpeech(input);
-    return { success: true, data: result };
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Failed to generate speech.';
-    console.error(error);
-    return { success: false, error: errorMessage };
   }
 }

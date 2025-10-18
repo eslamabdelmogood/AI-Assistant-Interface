@@ -1,6 +1,6 @@
 'use client';
 import { useState, useRef, useEffect, type Dispatch, type SetStateAction } from 'react';
-import { getConversationalResponse, getSpeech } from '@/app/actions';
+import { getConversationalResponse } from '@/app/actions';
 import ChatMessages from './chat-messages';
 import ChatInput from './chat-input';
 import { type Equipment, equipments } from '@/lib/data';
@@ -30,9 +30,6 @@ export default function ChatPanel({ selectedEquipment, setSelectedEquipment, set
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [currentlyPlayingId, setCurrentlyPlayingId] = useState<string | null>(null);
-  const [audioCache, setAudioCache] = useState<Record<string, string>>({});
-  const audioRef = useRef<HTMLAudioElement>(null);
   
   const { toast } = useToast();
   const [isRecording, setIsRecording] = useState(false);
@@ -72,22 +69,6 @@ export default function ChatPanel({ selectedEquipment, setSelectedEquipment, set
       console.warn('Speech recognition not supported in this browser.');
     }
   }, [toast]);
-  
-  useEffect(() => {
-    if (audioRef.current) {
-        audioRef.current.onended = () => {
-            setCurrentlyPlayingId(null);
-        };
-        audioRef.current.onerror = () => {
-            toast({
-                variant: 'destructive',
-                title: 'Audio Error',
-                description: 'Could not play audio.',
-            });
-            setCurrentlyPlayingId(null);
-        };
-    }
-  }, [toast]);
 
   const toggleRecording = () => {
     if (!recognitionRef.current) {
@@ -108,64 +89,14 @@ export default function ChatPanel({ selectedEquipment, setSelectedEquipment, set
     }
   };
 
-  const playAudio = (src: string) => {
-    if (audioRef.current) {
-      audioRef.current.src = src;
-      audioRef.current.play().catch(e => console.error("Audio play failed", e));
-    }
-  };
-
-  const togglePlayback = async (messageId: string, text: string) => {
-    if (currentlyPlayingId === messageId) {
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
-      setCurrentlyPlayingId(null);
-      return;
-    }
-
-    setCurrentlyPlayingId(messageId);
-
-    if (audioCache[messageId]) {
-      playAudio(audioCache[messageId]);
-      return;
-    }
-
-    try {
-      const res = await getSpeech({ text });
-      if (res.success && res.data) {
-        setAudioCache(prev => ({ ...prev, [messageId]: res.data.audio }));
-        playAudio(res.data.audio);
-      } else {
-        throw new Error(res.error || 'Failed to generate speech.');
-      }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
-      toast({
-        variant: "destructive",
-        title: "Speech Generation Error",
-        description: errorMessage,
-      });
-      setCurrentlyPlayingId(null);
-    }
-  };
-
   const addMessage = (role: 'user' | 'assistant', content: React.ReactNode, id?: string) => {
     const newMessage = { id: id || crypto.randomUUID(), role, content };
     setMessages(prev => [...prev, newMessage]);
-    if (role === 'assistant' && typeof content === 'string' && id) {
-        togglePlayback(id, content);
-    }
   };
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
-
-    if (audioRef.current && !audioRef.current.paused) {
-      audioRef.current.pause();
-    }
-    setCurrentlyPlayingId(null);
 
     const userInput = input;
     addMessage('user', userInput);
@@ -225,8 +156,7 @@ export default function ChatPanel({ selectedEquipment, setSelectedEquipment, set
 
   return (
     <div className="flex h-full flex-col bg-card">
-       <audio ref={audioRef} hidden />
-      <ChatMessages messages={messages} isLoading={isLoading} currentlyPlayingId={currentlyPlayingId} togglePlayback={togglePlayback} />
+      <ChatMessages messages={messages} isLoading={isLoading} />
       <ChatInput input={input} setInput={setInput} handleSendMessage={handleSendMessage} isLoading={isLoading} isRecording={isRecording} toggleRecording={toggleRecording} />
     </div>
   );
