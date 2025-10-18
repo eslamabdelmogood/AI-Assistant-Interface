@@ -9,7 +9,9 @@ import { z } from 'zod';
  * - TextToSpeechOutput - The TypeScript type for the textToSpeech function output.
  */
 
-export const TextToSpeechInputSchema = z.string();
+export const TextToSpeechInputSchema = z.object({
+  text: z.string().describe("The text to convert to speech."),
+});
 export type TextToSpeechInput = z.infer<typeof TextToSpeechInputSchema>;
 
 export const TextToSpeechOutputSchema = z.object({

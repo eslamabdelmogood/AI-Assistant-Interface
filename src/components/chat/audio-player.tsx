@@ -15,7 +15,7 @@ export default function AudioPlayer({ text, onPlaybackEnd, isPlaying }: AudioPla
   useEffect(() => {
     if (text && isPlaying) {
       const generateSpeech = async () => {
-        const res = await getSpeech(text);
+        const res = await getSpeech({ text });
         if (res.success && res.data) {
           setAudioSrc(res.data.audio);
         } else {
