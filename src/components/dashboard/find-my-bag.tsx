@@ -7,25 +7,31 @@ import type { View } from '@/app/page';
 import { Button } from '../ui/button';
 
 export default function FindMyBag({ setDashboardView }: { setDashboardView: (view: View) => void }) {
-  const bagImage = PlaceHolderImages.find(img => img.id === 'smart-bag');
+  const mapImage = PlaceHolderImages.find(img => img.id === 'factory-map');
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Smart Toolkit Bag</CardTitle>
-        <CardDescription>Last known location.</CardDescription>
+        <CardTitle>Smart Toolkit Bag Location</CardTitle>
+        <CardDescription>Last known location on the factory floor.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {bagImage && (
-          <div className="aspect-square w-full overflow-hidden rounded-lg border">
+        {mapImage && (
+          <div className="aspect-square w-full overflow-hidden rounded-lg border relative">
             <Image
-              src={bagImage.imageUrl}
-              alt={bagImage.description}
-              width={600}
-              height={600}
-              data-ai-hint={bagImage.imageHint}
-              className="object-cover h-full w-full"
+              src={mapImage.imageUrl}
+              alt={mapImage.description}
+              fill
+              data-ai-hint={mapImage.imageHint}
+              className="object-cover"
             />
+            <div className="absolute top-1/2 left-1/3 animate-pulse">
+                <Locate className="h-12 w-12 text-accent" />
+                <span className="relative flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-accent/80"></span>
+                </span>
+            </div>
           </div>
         )}
         <div className="flex justify-between items-center rounded-lg border p-4">
