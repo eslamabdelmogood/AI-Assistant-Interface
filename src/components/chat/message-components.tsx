@@ -67,14 +67,16 @@ export function DroneDispatchConfirmation() {
 export function VisualExplanation({ explanation }: { explanation: VisualExplanationOutput }) {
   return (
     <div className="space-y-3">
-      <div className="relative aspect-video w-full overflow-hidden rounded-lg border">
-        <Image
-          src={explanation.imageUrl}
-          alt="Visual Explanation"
-          fill
-          className="object-contain"
-        />
-      </div>
+      {explanation.imageUrl && (
+        <div className="relative aspect-video w-full overflow-hidden rounded-lg border">
+          <Image
+            src={explanation.imageUrl}
+            alt="Visual Explanation"
+            fill
+            className="object-contain"
+          />
+        </div>
+      )}
       <p className="text-sm">{explanation.description}</p>
     </div>
   );
