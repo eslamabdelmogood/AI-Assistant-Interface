@@ -66,7 +66,7 @@ export default function ChatInput({ input, setInput, handleSendMessage, isLoadin
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button type="button" size="icon" variant="ghost" className="text-destructive hover:bg-destructive/10 hover:text-destructive" disabled={isLoading} onClick={handleEmergency}>
+                  <Button type="button" size="icon" variant="destructive" className="rounded-full" disabled={isLoading} onClick={handleEmergency}>
                     <TriangleAlert className="h-5 w-5" />
                   </Button>
                 </TooltipTrigger>
