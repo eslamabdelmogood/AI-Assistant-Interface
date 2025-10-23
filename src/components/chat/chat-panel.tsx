@@ -131,12 +131,19 @@ export default function ChatPanel({ selectedEquipment, setSelectedEquipment, set
       addMessage('assistant', response, assistantMessageId);
       
       if (action === 'find-bag') {
-        setDashboardView('find-bag');
+        // This action is now handled by the dialog in ChatInput
         setIsLoading(false);
         return;
       }
       
-      const equipmentToUse = targetEquipment && equipments ? equipments.find(e => e.id === targetEquipment.id) : selectedEquipment;
+      let equipmentToUse = selectedEquipment;
+      if (targetEquipment && equipments) {
+        const foundEquipment = equipments.find(e => e.id === targetEquipment.id || e.name === targetEquipment.name);
+        if(foundEquipment) {
+          equipmentToUse = foundEquipment;
+        }
+      }
+
 
       if (action === 'explanation' && actionTopic) {
         await handleExplanation(actionTopic);
@@ -144,23 +151,24 @@ export default function ChatPanel({ selectedEquipment, setSelectedEquipment, set
         setSelectedEquipment(equipmentToUse);
         switch (action) {
           case 'report':
-            setDashboardView('report');
             addMessage('assistant', <MaintenanceReport equipment={equipmentToUse} />);
             break;
           case 'order':
-            setDashboardView('order');
             addMessage('assistant', <OrderParts equipment={equipmentToUse} setDashboardView={setDashboardView} addMessage={addMessage} />);
             break;
           case 'drone':
-            setDashboardView('drone');
             addMessage('assistant', <DroneDispatchConfirmation />);
             break;
           case 'status':
             // Display status in the chat.
-            const statusMessage = `${equipmentToUse.name} is currently ${equipmentToUse.status}.`;
-            addMessage('assistant', statusMessage);
-            const sensorReadings = equipmentToUse.sensors.map(s => `${s.name}: ${s.value} ${s.unit}`).join(', ');
-            addMessage('assistant', `Current sensor readings: ${sensorReadings}`);
+            if(equipmentToUse.sensors) {
+              const statusMessage = `${equipmentToUse.name} is currently ${equipmentToUse.status}.`;
+              addMessage('assistant', statusMessage);
+              const sensorReadings = equipmentToUse.sensors.map(s => `${s.name}: ${s.value} ${s.unit}`).join(', ');
+              addMessage('assistant', `Current sensor readings: ${sensorReadings}`);
+            } else {
+              addMessage('assistant', `I found ${equipmentToUse.name}, but I don't have any live sensor data for it.`);
+            }
             break;
           case 'diagnostics':
           case 'insights':
