@@ -1,6 +1,6 @@
 'use client';
 import { useState, useRef, useEffect, type Dispatch, type SetStateAction } from 'react';
-import { getConversationalResponse, explain } from '@/app/actions';
+import { getConversationalResponse, explain, textToSpeech } from '@/app/actions';
 import ChatMessages from './chat-messages';
 import ChatInput from './chat-input';
 import { type Equipment } from '@/lib/data';
@@ -14,6 +14,7 @@ export type Message = {
   id: string;
   role: 'user' | 'assistant' | 'system';
   content: React.ReactNode;
+  audioUrl?: string;
 };
 
 type ChatPanelProps = {
@@ -27,7 +28,7 @@ export default function ChatPanel({ selectedEquipment, setSelectedEquipment, set
     {
       id: 'init',
       role: 'assistant',
-      content: "Hello! I'm Factory AI. How can I help you with your factory equipment today? You can ask for equipment status, maintenance reports, or diagnostics.",
+      content: "أهلاً بك! أنا مساعد المصنع الذكي. كيف يمكنني مساعدتك اليوم فيما يتعلق بمعدات المصنع؟ يمكنك السؤال عن حالة المعدات، تقارير الصيانة، أو التشخيصات.",
     },
   ]);
   const [input, setInput] = useState('');
@@ -47,7 +48,7 @@ export default function ChatPanel({ selectedEquipment, setSelectedEquipment, set
       recognitionRef.current = new SpeechRecognition();
       recognitionRef.current.continuous = false;
       recognitionRef.current.interimResults = false;
-      recognitionRef.current.lang = 'en-US';
+      recognitionRef.current.lang = 'ar-SA';
 
       recognitionRef.current.onresult = (event: any) => {
         const transcript = event.results[0][0].transcript;
@@ -91,9 +92,10 @@ export default function ChatPanel({ selectedEquipment, setSelectedEquipment, set
     }
   };
 
-  const addMessage = (role: 'user' | 'assistant', content: React.ReactNode, id?: string) => {
-    const newMessage = { id: id || crypto.randomUUID(), role, content };
+  const addMessage = (role: 'user' | 'assistant', content: React.ReactNode, id?: string, audioUrl?: string) => {
+    const newMessage: Message = { id: id || crypto.randomUUID(), role, content, audioUrl };
     setMessages(prev => [...prev, newMessage]);
+    return newMessage;
   };
   
   const handleExplanation = async (topic: string) => {
@@ -106,6 +108,24 @@ export default function ChatPanel({ selectedEquipment, setSelectedEquipment, set
     } else {
       const errorContent = `Sorry, I failed to create an explanation. ${res.error || ''}`;
       setMessages(prev => prev.map(m => m.id === tempId ? { ...m, content: errorContent } : m));
+    }
+  };
+  
+  const handleTextToSpeech = async (text: string, messageId: string) => {
+    try {
+      const res = await textToSpeech({ text });
+      if (res.success && res.data?.audio) {
+        setMessages(prev => prev.map(m => m.id === messageId ? { ...m, audioUrl: res.data.audio } : m));
+      } else {
+        throw new Error(res.error || 'Failed to get audio.');
+      }
+    } catch (error) {
+      console.error('TTS Error:', error);
+      toast({
+        variant: "destructive",
+        title: "Audio Error",
+        description: "Failed to generate audio for the response.",
+      });
     }
   };
 
@@ -127,8 +147,10 @@ export default function ChatPanel({ selectedEquipment, setSelectedEquipment, set
       
       const { response, action, targetEquipment, actionTopic } = res.data;
 
-      const assistantMessageId = crypto.randomUUID();
-      addMessage('assistant', response, assistantMessageId);
+      const assistantMessage = addMessage('assistant', response);
+      if (response) {
+        await handleTextToSpeech(response, assistantMessage.id);
+      }
       
       if (action === 'find-bag') {
         // This action is now handled by the dialog in ChatInput

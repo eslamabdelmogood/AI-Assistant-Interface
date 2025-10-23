@@ -5,6 +5,8 @@ import { getRealTimeDiagnostics, type RealTimeDiagnosticsInput } from '@/ai/flow
 import { conversationalResponse, type ConversationalResponseInput } from '@/ai/flows/conversational-response';
 import { getVisualExplanation } from '@/ai/flows/visual-explanation';
 import type { VisualExplanationInput } from '@/ai/schemas/visual-explanation-schemas';
+import { textToSpeech as arabicTextToSpeech } from '@/ai/flows/text-to-speech-arabic';
+import { TextToSpeechInput } from '@/ai/schemas/text-to-speech-schemas';
 
 export async function getConversationalResponse(input: ConversationalResponseInput) {
     try {
@@ -43,6 +45,16 @@ export async function explain(input: VisualExplanationInput) {
   } catch (error) {
     console.error(error);
     const errorMessage = error instanceof Error ? error.message : 'Failed to get visual explanation.';
+    return { success: false, error: errorMessage };
+  }
+}
+
+export async function textToSpeech(input: TextToSpeechInput) {
+  try {
+    const result = await arabicTextToSpeech(input);
+    return { success: true, data: result };
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to convert text to speech.';
     return { success: false, error: errorMessage };
   }
 }

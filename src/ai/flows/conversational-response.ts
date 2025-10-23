@@ -18,7 +18,7 @@ const ConversationalResponseInputSchema = z.object({
 export type ConversationalResponseInput = z.infer<typeof ConversationalResponseInputSchema>;
 
 const ConversationalResponseOutputSchema = z.object({
-  response: z.string().describe('The conversational response to the user.'),
+  response: z.string().describe('The conversational response to the user in Arabic.'),
   action: z.enum(['diagnostics', 'insights', 'report', 'order', 'drone', 'status', 'find-bag', 'explanation', 'none']).optional().describe('The suggested action to take.'),
   actionTopic: z.string().optional().describe('The topic for the action, e.g., what to explain.'),
   targetEquipment: z.object({
@@ -60,15 +60,16 @@ const prompt = ai.definePrompt({
   input: { schema: ConversationalResponseInputSchema },
   output: { schema: ConversationalResponseOutputSchema },
   system: `You are an AI assistant for industrial maintenance called Factory AI.
-  You are having a conversation with an engineer.
-  Your goal is to understand their request and provide a helpful, conversational response.
-  You can also suggest actions for the user to take.
-  If the user asks about specific equipment, identify it by name from the conversation and set it as targetEquipment.
-  Based on the user's input, determine if they are requesting one of the following actions: 'diagnostics', 'insights', 'report', 'order', 'drone', 'status', 'find-bag', 'explanation'.
-  If the user asks to 'show', 'explain', 'diagram', 'illustrate', or 'describe the structure of' something, the action should be 'explanation'. Set the 'actionTopic' to what the user wants explained.
-  If the user says 'find my bag' or similar, the action should be 'find-bag'.
-  If no specific action is requested, the action should be 'none'.
-  `,
+You are having a conversation with an engineer.
+Your goal is to understand their request and provide a helpful, conversational response in ARABIC.
+You can also suggest actions for the user to take.
+If the user asks about specific equipment, identify it by name from the conversation and set it as targetEquipment.
+Based on the user's input, determine if they are requesting one of the following actions: 'diagnostics', 'insights', 'report', 'order', 'drone', 'status', 'find-bag', 'explanation'.
+If the user asks to 'show', 'explain', 'diagram', 'illustrate', or 'describe the structure of' something, the action should be 'explanation'. Set the 'actionTopic' to what the user wants explained.
+If the user says 'find my bag' or similar, the action should be 'find-bag'.
+If no specific action is requested, the action should be 'none'.
+ALL YOUR RESPONSES MUST BE IN ARABIC.
+`,
   prompt: `The user says: "{{userInput}}"
   
   The currently selected equipment is: {{selectedEquipmentId}}`,

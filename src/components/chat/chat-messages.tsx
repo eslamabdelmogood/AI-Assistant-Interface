@@ -6,6 +6,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import Logo from '../icons/logo';
 import { useEffect, useRef } from 'react';
+import { Volume2 } from 'lucide-react';
+import { Button } from '../ui/button';
 
 type ChatMessagesProps = {
   messages: Message[];
@@ -14,6 +16,7 @@ type ChatMessagesProps = {
 
 export default function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     if (scrollAreaRef.current) {
@@ -21,8 +24,16 @@ export default function ChatMessages({ messages, isLoading }: ChatMessagesProps)
     }
   }, [messages, isLoading]);
 
+  const playAudio = (audioUrl: string) => {
+    if (audioRef.current) {
+      audioRef.current.src = audioUrl;
+      audioRef.current.play().catch(e => console.error("Audio playback failed:", e));
+    }
+  };
+
   return (
     <ScrollArea className="flex-1" ref={scrollAreaRef}>
+       <audio ref={audioRef} />
       <div className="p-4 md:p-6 space-y-6">
         {messages.map((message) => (
           <div key={message.id} className={cn("flex items-start gap-4", message.role === 'user' && "justify-end")}>
@@ -35,13 +46,18 @@ export default function ChatMessages({ messages, isLoading }: ChatMessagesProps)
             )}
             <div
               className={cn(
-                "max-w-md rounded-lg p-3 text-sm",
+                "max-w-md rounded-lg p-3 text-sm flex items-center gap-2",
                 message.role === 'user'
                   ? "bg-primary text-primary-foreground"
                   : "bg-muted"
               )}
             >
-              {message.content}
+              <div className="flex-grow">{message.content}</div>
+              {message.audioUrl && (
+                <Button size="icon" variant="ghost" className="h-7 w-7 shrink-0" onClick={() => playAudio(message.audioUrl!)}>
+                  <Volume2 className="h-4 w-4" />
+                </Button>
+              )}
             </div>
              {message.role === 'user' && (
               <Avatar className="h-9 w-9 border border-border">
