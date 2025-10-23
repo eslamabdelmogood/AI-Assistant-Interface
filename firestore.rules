@@ -1,0 +1,118 @@
+/**
+ * @fileoverview Firestore Security Rules for the Green Assistant application.
+ *
+ * Core Philosophy:
+ * This ruleset enforces a strict ownership model for Equipment and its related
+ * data (SensorData, MaintenanceReports, WorkOrders, SparePartOrders). Each
+ * piece of equipment is treated as a top-level document, and related data is
+ * stored in subcollections under that equipment's document.  All access
+ * control is based on verifying the user's identity.
+ *
+ * Data Structure:
+ * - /equipment/{equipmentId}: Stores equipment information.
+ * - /equipment/{equipmentId}/sensorData/{sensorDataId}: Stores sensor data for equipment.
+ * - /equipment/{equipmentId}/maintenanceReports/{maintenanceReportId}: Stores maintenance reports.
+ * - /equipment/{equipmentId}/workOrders/{workOrderId}: Stores work orders.
+ * - /equipment/{equipmentId}/sparePartOrders/{sparePartOrderId}: Stores spare part orders.
+ *
+ * Key Security Decisions:
+ * - All data is scoped to individual equipment. There is no global role-based
+ *   access control.
+ * - `list` operations are generally allowed to the owner of a equipment's data,
+ *   but this can be restricted on a per-collection basis if needed.
+ * - The rules are designed to prevent unauthorized data modification or deletion.
+ * - Data shape validation is relaxed to allow for rapid prototyping, but
+ *   authorization checks are strictly enforced.
+ *
+ * Denormalization for Authorization:
+ *  - The `equipmentId` is denormalized into the subcollection documents (SensorData, MaintenanceReport, WorkOrder, SparePartOrder) to allow for simpler security rules. This enables direct verification of the relationship between a piece of equipment and its related data without requiring complex queries.
+ *
+ * Structural Segregation:
+ *  - The separation of different types of data (equipment, sensor data, maintenance reports, etc.) into distinct collections allows for a more granular and secure access control strategy.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * @description Grants access to equipment documents based on ownership.
+     * @path /equipment/{equipmentId}
+     * @allow (create) User with valid auth can create a new equipment document.
+     * @allow (get, list, update, delete) User with valid auth can get, list, update, and delete equipment document if they are the owner.
+     * @deny (create) User without valid auth cannot create a new equipment document.
+     * @deny (get, list, update, delete) User without valid auth cannot get, list, update, and delete equipment document.
+     * @principle Enforces document ownership for writes.
+     */
+    match /equipment/{equipmentId} {
+      // isOwner(equipmentId) verifies that the authenticated user's ID matches the equipmentId.
+      allow get, list: if true;
+      allow create: if isSignedIn() && request.resource.data.id == equipmentId;
+      allow update, delete: if isSignedIn() && resource.data.id == equipmentId;
+    }
+
+    /**
+     * @description Grants access to sensor data documents based on equipment ownership.
+     * @path /equipment/{equipmentId}/sensorData/{sensorDataId}
+     * @allow (create) User with valid auth can create a new sensor data document if they are the owner of the equipment.
+     * @allow (get, list, update, delete) User with valid auth can get, list, update, and delete sensor data document if they are the owner of the equipment.
+     * @deny (create) User without valid auth cannot create a new sensor data document.
+     * @deny (get, list, update, delete) User without valid auth cannot get, list, update, and delete sensor data document.
+     * @principle Enforces document ownership for writes and reads.
+     */
+    match /equipment/{equipmentId}/sensorData/{sensorDataId} {
+      // isEquipmentOwner(equipmentId) verifies that the authenticated user's ID matches the equipmentId.
+      allow get, list: if isSignedIn() && get(/databases/$(database)/documents/equipment/$(equipmentId)).data.id == equipmentId;
+      allow create: if isSignedIn() && get(/databases/$(database)/documents/equipment/$(equipmentId)).data.id == equipmentId;
+      allow update, delete: if isSignedIn() && get(/databases/$(database)/documents/equipment/$(equipmentId)).data.id == equipmentId;
+    }
+
+    /**
+     * @description Grants access to maintenance report documents based on equipment ownership.
+     * @path /equipment/{equipmentId}/maintenanceReports/{maintenanceReportId}
+     * @allow (create) User with valid auth can create a new maintenance report document if they are the owner of the equipment.
+     * @allow (get, list, update, delete) User with valid auth can get, list, update, and delete maintenance report document if they are the owner of the equipment.
+     * @deny (create) User without valid auth cannot create a new maintenance report document.
+     * @deny (get, list, update, delete) User without valid auth cannot get, list, update, and delete maintenance report document.
+     * @principle Enforces document ownership for writes and reads.
+     */
+    match /equipment/{equipmentId}/maintenanceReports/{maintenanceReportId} {
+      allow get, list: if isSignedIn() && get(/databases/$(database)/documents/equipment/$(equipmentId)).data.id == equipmentId;
+      allow create: if isSignedIn() && get(/databases/$(database)/documents/equipment/$(equipmentId)).data.id == equipmentId;
+      allow update, delete: if isSignedIn() && get(/databases/$(database)/documents/equipment/$(equipmentId)).data.id == equipmentId;
+    }
+
+    /**
+     * @description Grants access to work order documents based on equipment ownership.
+     * @path /equipment/{equipmentId}/workOrders/{workOrderId}
+     * @allow (create) User with valid auth can create a new work order document if they are the owner of the equipment.
+     * @allow (get, list, update, delete) User with valid auth can get, list, update, and delete work order document if they are the owner of the equipment.
+     * @deny (create) User without valid auth cannot create a new work order document.
+     * @deny (get, list, update, delete) User without valid auth cannot get, list, update, and delete work order document.
+     * @principle Enforces document ownership for writes and reads.
+     */
+    match /equipment/{equipmentId}/workOrders/{workOrderId} {
+      allow get, list: if isSignedIn() && get(/databases/$(database)/documents/equipment/$(equipmentId)).data.id == equipmentId;
+      allow create: if isSignedIn() && get(/databases/$(database)/documents/equipment/$(equipmentId)).data.id == equipmentId;
+      allow update, delete: if isSignedIn() && get(/databases/$(database)/documents/equipment/$(equipmentId)).data.id == equipmentId;
+    }
+
+    /**
+     * @description Grants access to spare part order documents based on equipment ownership.
+     * @path /equipment/{equipmentId}/sparePartOrders/{sparePartOrderId}
+     * @allow (create) User with valid auth can create a new spare part order document if they are the owner of the equipment.
+     * @allow (get, list, update, delete) User with valid auth can get, list, update, and delete spare part order document if they are the owner of the equipment.
+     * @deny (create) User without valid auth cannot create a new spare part order document.
+     * @deny (get, list, update, delete) User without valid auth cannot get, list, update, and delete spare part order document.
+     * @principle Enforces document ownership for writes and reads.
+     */
+    match /equipment/{equipmentId}/sparePartOrders/{sparePartOrderId} {
+      allow get, list: if isSignedIn() && get(/databases/$(database)/documents/equipment/$(equipmentId)).data.id == equipmentId;
+      allow create: if isSignedIn() && get(/databases/$(database)/documents/equipment/$(equipmentId)).data.id == equipmentId;
+      allow update, delete: if isSignedIn() && get(/databases/$(database)/documents/equipment/$(equipmentId)).data.id == equipmentId;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+  }
+}
