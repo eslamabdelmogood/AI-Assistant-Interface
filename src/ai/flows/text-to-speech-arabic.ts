@@ -58,7 +58,7 @@ const textToSpeechFlow = ai.defineFlow(
         responseModalities: ['AUDIO'],
         speechConfig: {
           voiceConfig: {
-            prebuiltVoiceConfig: { voiceName: 'Artemis' }, // A voice that supports Arabic
+            prebuiltVoiceConfig: { voiceName: 'Algenib' }, // A voice that supports Arabic
           },
           languageCode: 'ar-SA',
         },
