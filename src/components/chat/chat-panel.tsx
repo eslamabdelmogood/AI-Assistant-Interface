@@ -3,10 +3,12 @@ import { useState, useRef, useEffect, type Dispatch, type SetStateAction } from 
 import { getConversationalResponse, explain } from '@/app/actions';
 import ChatMessages from './chat-messages';
 import ChatInput from './chat-input';
-import { type Equipment, equipments } from '@/lib/data';
+import { type Equipment } from '@/lib/data';
 import { useToast } from '@/hooks/use-toast';
 import { MaintenanceReport, OrderParts, DroneDispatchConfirmation, VisualExplanation } from './message-components';
 import type { View } from '@/app/page';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { collection } from 'firebase/firestore';
 
 export type Message = {
   id: string;
@@ -34,6 +36,10 @@ export default function ChatPanel({ selectedEquipment, setSelectedEquipment, set
   const { toast } = useToast();
   const [isRecording, setIsRecording] = useState(false);
   const recognitionRef = useRef<any>(null);
+
+  const firestore = useFirestore();
+  const equipmentQuery = useMemoFirebase(() => firestore ? collection(firestore, 'equipment') : null, [firestore]);
+  const { data: equipments, isLoading: isLoadingEquipments } = useCollection<Equipment>(equipmentQuery);
 
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -130,7 +136,7 @@ export default function ChatPanel({ selectedEquipment, setSelectedEquipment, set
         return;
       }
       
-      const equipmentToUse = targetEquipment ? equipments.find(e => e.id === targetEquipment.id) : selectedEquipment;
+      const equipmentToUse = targetEquipment && equipments ? equipments.find(e => e.id === targetEquipment.id) : selectedEquipment;
 
       if (action === 'explanation' && actionTopic) {
         await handleExplanation(actionTopic);
@@ -150,9 +156,16 @@ export default function ChatPanel({ selectedEquipment, setSelectedEquipment, set
             addMessage('assistant', <DroneDispatchConfirmation />);
             break;
           case 'status':
+            // Display status in the chat.
+            const statusMessage = `${equipmentToUse.name} is currently ${equipmentToUse.status}.`;
+            addMessage('assistant', statusMessage);
+            const sensorReadings = equipmentToUse.sensors.map(s => `${s.name}: ${s.value} ${s.unit}`).join(', ');
+            addMessage('assistant', `Current sensor readings: ${sensorReadings}`);
+            break;
           case 'diagnostics':
           case 'insights':
-            setDashboardView('dashboard');
+            // These actions used to open the dashboard, now they can provide info in chat
+             addMessage('assistant', `Running ${action} for ${equipmentToUse.name}...`);
             break;
         }
       }
@@ -173,8 +186,8 @@ export default function ChatPanel({ selectedEquipment, setSelectedEquipment, set
 
   return (
     <div className="flex h-full flex-col bg-card">
-      <ChatMessages messages={messages} isLoading={isLoading} />
-      <ChatInput input={input} setInput={setInput} handleSendMessage={handleSendMessage} isLoading={isLoading} isRecording={isRecording} toggleRecording={toggleRecording} />
+      <ChatMessages messages={messages} isLoading={isLoading || isLoadingEquipments} />
+      <ChatInput input={input} setInput={setInput} handleSendMessage={handleSendMessage} isLoading={isLoading || isLoadingEquipments} isRecording={isRecording} toggleRecording={toggleRecording} />
     </div>
   );
 }

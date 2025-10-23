@@ -10,7 +10,6 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
-import { equipments, type Equipment } from '@/lib/data';
 
 const ConversationalResponseInputSchema = z.object({
   userInput: z.string().describe('The user\'s query.'),
@@ -35,13 +34,13 @@ const ConversationalResponseOutputSchema = z.object({
         time: z.string(),
         value: z.number(),
       })),
-    })),
+    })).optional(),
     maintenanceLog: z.array(z.object({
       id: z.string(),
       date: z.string(),
       description: z.string(),
       status: z.string(),
-    })),
+    })).optional(),
   }).optional().describe('The equipment the user is asking about.'),
 });
 export type ConversationalResponseOutput = z.infer<typeof ConversationalResponseOutputSchema>;
@@ -53,7 +52,8 @@ export async function conversationalResponse(
   return conversationalResponseFlow(input);
 }
 
-const equipmentList = equipments.map(e => ({ id: e.id, name: e.name, type: e.type, status: e.status })).join(', ');
+// The static equipment list is removed, as it will be fetched from Firestore.
+// The prompt can be simplified to just rely on its general knowledge and the conversation context.
 
 const prompt = ai.definePrompt({
   name: 'conversationalResponsePrompt',
@@ -63,9 +63,7 @@ const prompt = ai.definePrompt({
   You are having a conversation with an engineer.
   Your goal is to understand their request and provide a helpful, conversational response.
   You can also suggest actions for the user to take.
-  Available equipment: ${equipmentList}.
-  If the user asks about equipment not on the list, say you don't have information about it.
-  If the user mentions a piece of equipment, identify it and set it as targetEquipment.
+  If the user asks about specific equipment, identify it by name from the conversation and set it as targetEquipment.
   Based on the user's input, determine if they are requesting one of the following actions: 'diagnostics', 'insights', 'report', 'order', 'drone', 'status', 'find-bag', 'explanation'.
   If the user asks to 'show', 'explain', 'diagram', 'illustrate', or 'describe the structure of' something, the action should be 'explanation'. Set the 'actionTopic' to what the user wants explained.
   If the user says 'find my bag' or similar, the action should be 'find-bag'.
@@ -83,14 +81,9 @@ const conversationalResponseFlow = ai.defineFlow(
     outputSchema: ConversationalResponseOutputSchema,
   },
   async (input) => {
+    // We no longer need to pass the equipment list to the prompt.
+    // The logic to find full equipment data is also removed, as that will be handled client-side with Firestore data.
     const { output } = await prompt(input);
-    if (output && output.targetEquipment) {
-        // Full equipment data needs to be returned, not just what the prompt knows
-        const fullEquipment = equipments.find(e => e.id === output.targetEquipment?.id);
-        if (fullEquipment) {
-            output.targetEquipment = fullEquipment;
-        }
-    }
     return output!;
   }
 );
