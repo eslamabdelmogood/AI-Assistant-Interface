@@ -23,6 +23,13 @@ type ChatPanelProps = {
   setDashboardView: Dispatch<SetStateAction<View>>;
 };
 
+declare global {
+  interface Window {
+    SpeechRecognition: any;
+    webkitSpeechRecognition: any;
+  }
+}
+
 export default function ChatPanel({ selectedEquipment, setSelectedEquipment, setDashboardView }: ChatPanelProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
