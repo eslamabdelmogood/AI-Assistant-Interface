@@ -5,7 +5,7 @@ import { getRealTimeDiagnostics, type RealTimeDiagnosticsInput } from '@/ai/flow
 import { conversationalResponse, type ConversationalResponseInput } from '@/ai/flows/conversational-response';
 import { getVisualExplanation } from '@/ai/flows/visual-explanation';
 import type { VisualExplanationInput } from '@/ai/schemas/visual-explanation-schemas';
-import { textToSpeech as arabicTextToSpeech } from '@/ai/flows/text-to-speech-arabic';
+import { textToSpeech as englishTextToSpeech } from '@/ai/flows/text-to-speech-english';
 import { TextToSpeechInput } from '@/ai/schemas/text-to-speech-schemas';
 
 export async function getConversationalResponse(input: ConversationalResponseInput) {
@@ -51,7 +51,7 @@ export async function explain(input: VisualExplanationInput) {
 
 export async function textToSpeech(input: TextToSpeechInput) {
   try {
-    const result = await arabicTextToSpeech(input);
+    const result = await englishTextToSpeech(input);
     return { success: true, data: result };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Failed to convert text to speech.';

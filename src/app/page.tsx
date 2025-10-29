@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ChatPanel from '@/components/chat/chat-panel';
 import Header from '@/components/layout/header';
 import { type Equipment } from '@/lib/data';

@@ -35,7 +35,7 @@ export default function ChatPanel({ selectedEquipment, setSelectedEquipment, set
     {
       id: 'init',
       role: 'assistant',
-      content: "أهلاً بك! أنا مساعد المصنع الذكي. كيف يمكنني مساعدتك اليوم فيما يتعلق بمعدات المصنع؟ يمكنك السؤال عن حالة المعدات، تقارير الصيانة، أو التشخيصات.",
+      content: "Welcome! I'm the factory AI assistant. How can I help you with the factory equipment today? You can ask about equipment status, maintenance reports, or diagnostics.",
     },
   ]);
   const [input, setInput] = useState('');
@@ -55,7 +55,7 @@ export default function ChatPanel({ selectedEquipment, setSelectedEquipment, set
       recognitionRef.current = new SpeechRecognition();
       recognitionRef.current.continuous = false;
       recognitionRef.current.interimResults = false;
-      recognitionRef.current.lang = 'ar-SA';
+      recognitionRef.current.lang = 'en-US';
 
       recognitionRef.current.onresult = (event: any) => {
         const transcript = event.results[0][0].transcript;

@@ -1,7 +1,7 @@
 'use server';
 
 /**
- * @fileOverview Converts Arabic text to speech.
+ * @fileOverview Converts English text to speech.
  *
  * - textToSpeech - A function that converts text to speech.
  */
@@ -47,7 +47,7 @@ async function toWav(
 
 const textToSpeechFlow = ai.defineFlow(
   {
-    name: 'textToSpeechArabicFlow',
+    name: 'textToSpeechEnglishFlow',
     inputSchema: TextToSpeechInputSchema,
     outputSchema: TextToSpeechOutputSchema,
   },
@@ -58,9 +58,9 @@ const textToSpeechFlow = ai.defineFlow(
         responseModalities: ['AUDIO'],
         speechConfig: {
           voiceConfig: {
-            prebuiltVoiceConfig: { voiceName: 'Algenib' }, // A voice that supports Arabic
+            prebuiltVoiceConfig: { voiceName: 'Puck' }, // A voice that supports English
           },
-          languageCode: 'ar-SA',
+          languageCode: 'en-US',
         },
       },
       prompt: text,
