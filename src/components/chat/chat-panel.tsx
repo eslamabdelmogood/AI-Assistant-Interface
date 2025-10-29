@@ -1,14 +1,16 @@
 'use client';
 import { useState, useRef, useEffect, type Dispatch, type SetStateAction } from 'react';
-import { getConversationalResponse, explain, textToSpeech } from '@/app/actions';
+import { getConversationalResponse, explain, textToSpeech, getDiagnostics, getInsights } from '@/app/actions';
 import ChatMessages from './chat-messages';
 import ChatInput from './chat-input';
-import { type Equipment } from '@/lib/data';
 import { useToast } from '@/hooks/use-toast';
-import { MaintenanceReport, OrderParts, DroneDispatchConfirmation, VisualExplanation } from './message-components';
+import { MaintenanceReport, OrderParts, DroneDispatchConfirmation, VisualExplanation, ActionButtons } from './message-components';
 import type { View } from '@/app/page';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection } from 'firebase/firestore';
+
+// This imports the Equipment type from the backend definition.
+import type { Equipment } from '@/../docs/backend-schema';
 
 export type Message = {
   id: string;
@@ -20,7 +22,6 @@ export type Message = {
 type ChatPanelProps = {
   selectedEquipment: Equipment | null;
   setSelectedEquipment: Dispatch<SetStateAction<Equipment | null>>;
-  setDashboardView: Dispatch<SetStateAction<View>>;
 };
 
 declare global {
@@ -30,12 +31,12 @@ declare global {
   }
 }
 
-export default function ChatPanel({ selectedEquipment, setSelectedEquipment, setDashboardView }: ChatPanelProps) {
+export default function ChatPanel({ selectedEquipment, setSelectedEquipment }: ChatPanelProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 'init',
       role: 'assistant',
-      content: "Welcome! I'm the factory AI assistant. How can I help you with the factory equipment today? You can ask about equipment status, maintenance reports, or diagnostics.",
+      content: "Hello! I'm your factory AI assistant. You can ask me things like 'What is the status of CNC-001?' or 'Show me the maintenance log for the main conveyor belt.'",
     },
   ]);
   const [input, setInput] = useState('');
@@ -44,6 +45,10 @@ export default function ChatPanel({ selectedEquipment, setSelectedEquipment, set
   const { toast } = useToast();
   const [isRecording, setIsRecording] = useState(false);
   const recognitionRef = useRef<any>(null);
+  
+  // State to control the 'Find Bag' dialog
+  const [isFindBagDialogOpen, setIsFindBagDialogOpen] = useState(false);
+
 
   const firestore = useFirestore();
   const equipmentQuery = useMemoFirebase(() => firestore ? collection(firestore, 'equipment') : null, [firestore]);
@@ -75,8 +80,6 @@ export default function ChatPanel({ selectedEquipment, setSelectedEquipment, set
       recognitionRef.current.onend = () => {
         setIsRecording(false);
       };
-    } else {
-      console.warn('Speech recognition not supported in this browser.');
     }
   }, [toast]);
 
@@ -136,6 +139,49 @@ export default function ChatPanel({ selectedEquipment, setSelectedEquipment, set
     }
   };
 
+  const handleAction = async (action: string, equipment: Equipment) => {
+    setIsLoading(true);
+    addMessage('user', `Perform action: ${action} on ${equipment.name}`);
+    
+    switch (action) {
+        case 'report':
+            addMessage('assistant', <MaintenanceReport equipment={equipment} />);
+            break;
+        case 'order':
+            addMessage('assistant', <OrderParts equipment={equipment} addMessage={addMessage} />);
+            break;
+        case 'diagnostics': {
+            const tempId = crypto.randomUUID();
+            addMessage('assistant', `Running diagnostics for ${equipment.name}...`, tempId);
+            const sensorData = (equipment.sensors || []).reduce((acc, s) => {
+                acc[s.name] = s.value;
+                return acc;
+            }, {} as Record<string, number>);
+            
+            const res = await getDiagnostics({ equipmentType: equipment.type, sensorData });
+            
+            if (res.success && res.data) {
+                setMessages(prev => prev.map(m => m.id === tempId ? { ...m, content: res.data.diagnosis } : m));
+            } else {
+                 setMessages(prev => prev.map(m => m.id === tempId ? { ...m, content: `Failed to run diagnostics. ${res.error}` } : m));
+            }
+            break;
+        }
+        case 'insights': {
+            const tempId = crypto.randomUUID();
+            addMessage('assistant', `Generating insights for ${equipment.name}...`, tempId);
+            const res = await getInsights({ equipmentId: equipment.id });
+            if (res.success && res.data) {
+                setMessages(prev => prev.map(m => m.id === tempId ? { ...m, content: res.data.insights } : m));
+            } else {
+                setMessages(prev => prev.map(m => m.id === tempId ? { ...m, content: `Failed to generate insights. ${res.error}` } : m));
+            }
+            break;
+        }
+    }
+    setIsLoading(false);
+  };
+
   const handleSendMessage = async (e: React.FormEvent, message?: string) => {
     e.preventDefault();
     const userInput = message || input;
@@ -154,13 +200,14 @@ export default function ChatPanel({ selectedEquipment, setSelectedEquipment, set
       
       const { response, action, targetEquipment, actionTopic } = res.data;
 
-      const assistantMessage = addMessage('assistant', response);
+      // Handle simple text response first
       if (response) {
+        const assistantMessage = addMessage('assistant', response);
         await handleTextToSpeech(response, assistantMessage.id);
       }
       
       if (action === 'find-bag') {
-        // This action is now handled by the dialog in ChatInput
+        setIsFindBagDialogOpen(true);
         setIsLoading(false);
         return;
       }
@@ -170,40 +217,32 @@ export default function ChatPanel({ selectedEquipment, setSelectedEquipment, set
         const foundEquipment = equipments.find(e => e.id === targetEquipment.id || e.name === targetEquipment.name);
         if(foundEquipment) {
           equipmentToUse = foundEquipment;
+          setSelectedEquipment(foundEquipment);
         }
       }
-
 
       if (action === 'explanation' && actionTopic) {
         await handleExplanation(actionTopic);
       } else if (equipmentToUse) {
-        setSelectedEquipment(equipmentToUse);
         switch (action) {
-          case 'report':
-            addMessage('assistant', <MaintenanceReport equipment={equipmentToUse} />);
-            break;
-          case 'order':
-            addMessage('assistant', <OrderParts equipment={equipmentToUse} setDashboardView={setDashboardView} addMessage={addMessage} />);
-            break;
-          case 'drone':
-            addMessage('assistant', <DroneDispatchConfirmation />);
-            break;
           case 'status':
-            // Display status in the chat.
-            if(equipmentToUse.sensors) {
+            if(equipmentToUse.status) {
               const statusMessage = `${equipmentToUse.name} is currently ${equipmentToUse.status}.`;
               addMessage('assistant', statusMessage);
-              const sensorReadings = equipmentToUse.sensors.map(s => `${s.name}: ${s.value} ${s.unit}`).join(', ');
-              addMessage('assistant', `Current sensor readings: ${sensorReadings}`);
+              addMessage('assistant', <ActionButtons equipment={equipmentToUse} onAction={handleAction} />);
             } else {
-              addMessage('assistant', `I found ${equipmentToUse.name}, but I don't have any live sensor data for it.`);
+              addMessage('assistant', `I found ${equipmentToUse.name}, but I don't have live status data for it.`);
             }
             break;
+          case 'report':
+          case 'order':
           case 'diagnostics':
           case 'insights':
-            // These actions used to open the dashboard, now they can provide info in chat
-             addMessage('assistant', `Running ${action} for ${equipmentToUse.name}...`);
+            handleAction(action, equipmentToUse);
             break;
+          case 'drone':
+             addMessage('assistant', <DroneDispatchConfirmation />);
+             break;
         }
       }
 
@@ -224,7 +263,16 @@ export default function ChatPanel({ selectedEquipment, setSelectedEquipment, set
   return (
     <div className="flex h-full flex-col bg-card">
       <ChatMessages messages={messages} isLoading={isLoading || isLoadingEquipments} />
-      <ChatInput input={input} setInput={setInput} handleSendMessage={handleSendMessage} isLoading={isLoading || isLoadingEquipments} isRecording={isRecording} toggleRecording={toggleRecording} />
+      <ChatInput 
+        input={input} 
+        setInput={setInput} 
+        handleSendMessage={handleSendMessage} 
+        isLoading={isLoading || isLoadingEquipments} 
+        isRecording={isRecording} 
+        toggleRecording={toggleRecording}
+        isFindBagDialogOpen={isFindBagDialogOpen}
+        setIsFindBagDialogOpen={setIsFindBagDialogOpen}
+      />
     </div>
   );
 }

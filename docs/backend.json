@@ -8,7 +8,7 @@
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique identifier for the Equipment entity."
+          "description": "Unique identifier for the Equipment entity. This is the document ID."
         },
         "name": {
           "type": "string",
@@ -25,20 +25,6 @@
         "location": {
           "type": "string",
           "description": "The location of the equipment."
-        },
-        "lastMaintenanceDate": {
-          "type": "string",
-          "description": "The date of the last maintenance performed on the equipment.",
-          "format": "date-time"
-        },
-        "nextMaintenanceDate": {
-          "type": "string",
-          "description": "The date of the next scheduled maintenance for the equipment.",
-          "format": "date-time"
-        },
-        "sensorDataId": {
-          "type": "string",
-          "description": "Reference to SensorData. (Relationship: Equipment 1:1 SensorData)"
         }
       },
       "required": [
@@ -48,169 +34,10 @@
         "status",
         "location"
       ]
-    },
-    "SensorData": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "SensorData",
-      "type": "object",
-      "description": "Represents the sensor data associated with a specific equipment.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the SensorData entity."
-        },
-        "equipmentId": {
-          "type": "string",
-          "description": "Reference to Equipment. (Relationship: Equipment 1:1 SensorData)"
-        },
-        "temperature": {
-          "type": "number",
-          "description": "The temperature reading from the sensor."
-        },
-        "pressure": {
-          "type": "number",
-          "description": "The pressure reading from the sensor."
-        },
-        "vibration": {
-          "type": "number",
-          "description": "The vibration reading from the sensor."
-        },
-        "timestamp": {
-          "type": "string",
-          "description": "The timestamp of the sensor data reading.",
-          "format": "date-time"
-        }
-      },
-      "required": [
-        "id",
-        "equipmentId",
-        "timestamp"
-      ]
-    },
-    "MaintenanceReport": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "MaintenanceReport",
-      "type": "object",
-      "description": "Represents a maintenance report for a piece of equipment.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the MaintenanceReport entity."
-        },
-        "equipmentId": {
-          "type": "string",
-          "description": "Reference to Equipment. (Relationship: Equipment 1:N MaintenanceReport)"
-        },
-        "reportDate": {
-          "type": "string",
-          "description": "The date the maintenance report was generated.",
-          "format": "date-time"
-        },
-        "description": {
-          "type": "string",
-          "description": "A description of the maintenance performed."
-        },
-        "partsReplaced": {
-          "type": "array",
-          "description": "List of parts replaced during maintenance.",
-          "items": {
-            "type": "string"
-          }
-        }
-      },
-      "required": [
-        "id",
-        "equipmentId",
-        "reportDate",
-        "description"
-      ]
-    },
-    "WorkOrder": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "WorkOrder",
-      "type": "object",
-      "description": "Represents a work order for maintenance or repair of equipment.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the WorkOrder entity."
-        },
-        "equipmentId": {
-          "type": "string",
-          "description": "Reference to Equipment. (Relationship: Equipment 1:N WorkOrder)"
-        },
-        "creationDate": {
-          "type": "string",
-          "description": "The date the work order was created.",
-          "format": "date-time"
-        },
-        "priority": {
-          "type": "string",
-          "description": "The priority of the work order (e.g., 'high', 'medium', 'low')."
-        },
-        "status": {
-          "type": "string",
-          "description": "The status of the work order (e.g., 'open', 'in progress', 'completed')."
-        },
-        "description": {
-          "type": "string",
-          "description": "A description of the work to be performed."
-        }
-      },
-      "required": [
-        "id",
-        "equipmentId",
-        "creationDate",
-        "priority",
-        "status",
-        "description"
-      ]
-    },
-    "SparePartOrder": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "SparePartOrder",
-      "type": "object",
-      "description": "Represents an order for spare parts.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the SparePartOrder entity."
-        },
-        "equipmentId": {
-          "type": "string",
-          "description": "Reference to Equipment. (Relationship: Equipment 1:N SparePartOrder)"
-        },
-        "orderDate": {
-          "type": "string",
-          "description": "The date the order was placed.",
-          "format": "date-time"
-        },
-        "partNumber": {
-          "type": "string",
-          "description": "The part number of the spare part."
-        },
-        "quantity": {
-          "type": "number",
-          "description": "The quantity of spare parts ordered."
-        },
-        "status": {
-          "type": "string",
-          "description": "The status of the order (e.g., 'pending', 'shipped', 'delivered')."
-        }
-      },
-      "required": [
-        "id",
-        "equipmentId",
-        "orderDate",
-        "partNumber",
-        "quantity",
-        "status"
-      ]
     }
   },
   "auth": {
     "providers": [
-      "password",
       "anonymous"
     ]
   },
@@ -223,96 +50,15 @@
           "schema": {
             "$ref": "#/backend/entities/Equipment"
           },
-          "description": "Stores equipment information.  Includes an 'id' field as the document ID. Supports querying equipment status. The `equipmentId` is used as the document ID.",
+          "description": "Stores equipment information. The `equipmentId` from the path is used as the document ID and should match the 'id' field within the document.",
           "params": [
             {
               "name": "equipmentId",
               "description": "The unique identifier for the equipment."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/equipment/{equipmentId}/sensorData/{sensorDataId}",
-        "definition": {
-          "entityName": "SensorData",
-          "schema": {
-            "$ref": "#/backend/entities/SensorData"
-          },
-          "description": "Stores sensor data for a specific equipment. The `equipmentId` is part of the path, ensuring a clear relationship between equipment and its sensor data. The `sensorDataId` is used as the document ID.",
-          "params": [
-            {
-              "name": "equipmentId",
-              "description": "The unique identifier for the equipment."
-            },
-            {
-              "name": "sensorDataId",
-              "description": "The unique identifier for the sensor data."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/equipment/{equipmentId}/maintenanceReports/{maintenanceReportId}",
-        "definition": {
-          "entityName": "MaintenanceReport",
-          "schema": {
-            "$ref": "#/backend/entities/MaintenanceReport"
-          },
-          "description": "Stores maintenance reports for a specific equipment. The `equipmentId` is part of the path, ensuring a clear relationship between equipment and its maintenance reports.  The `maintenanceReportId` is used as the document ID.",
-          "params": [
-            {
-              "name": "equipmentId",
-              "description": "The unique identifier for the equipment."
-            },
-            {
-              "name": "maintenanceReportId",
-              "description": "The unique identifier for the maintenance report."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/equipment/{equipmentId}/workOrders/{workOrderId}",
-        "definition": {
-          "entityName": "WorkOrder",
-          "schema": {
-            "$ref": "#/backend/entities/WorkOrder"
-          },
-          "description": "Stores work orders for a specific equipment. The `equipmentId` is part of the path, ensuring a clear relationship between equipment and its work orders. The `workOrderId` is used as the document ID.",
-          "params": [
-            {
-              "name": "equipmentId",
-              "description": "The unique identifier for the equipment."
-            },
-            {
-              "name": "workOrderId",
-              "description": "The unique identifier for the work order."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/equipment/{equipmentId}/sparePartOrders/{sparePartOrderId}",
-        "definition": {
-          "entityName": "SparePartOrder",
-          "schema": {
-            "$ref": "#/backend/entities/SparePartOrder"
-          },
-          "description": "Stores spare part orders for a specific equipment. The `equipmentId` is part of the path, ensuring a clear relationship between equipment and its spare part orders. The `sparePartOrderId` is used as the document ID.",
-          "params": [
-            {
-              "name": "equipmentId",
-              "description": "The unique identifier for the equipment."
-            },
-            {
-              "name": "sparePartOrderId",
-              "description": "The unique identifier for the spare part order."
             }
           ]
         }
       }
-    ],
-    "reasoning": "This Firestore data structure is designed to support the Green Assistant application, focusing on equipment status, maintenance, and spare part ordering, while prioritizing security and scalability.  The design emphasizes authorization independence to facilitate robust security rules and atomic operations. The user requested the removal of the dashboard and display the status from the database. The structure supports listing equipment and their statuses efficiently.\n\n**Authorization Independence (Denormalization):**\nThe structure achieves authorization independence by avoiding hierarchical dependencies. The 'equipment' documents do not rely on parent document data, therefore, simplifying the security rules and enabling atomic operations.\n\n**Structural Segregation (Homogeneous Security Posture):**\nThe structure is segregated based on the type of data. Each collection holds documents with similar access control requirements, simplifying security rules.\n\n**Access Modeling:**\n*   Equipment and related data (SensorData, MaintenanceReports, WorkOrders, SparePartOrders) are organized under a top-level collection `/equipment/{equipmentId}`.\n\n**QAPs (Rules are not Filters):**\nThe structure supports secure `list` operations. For instance, listing equipment is straightforward since all equipment documents reside in a single collection with a uniform security posture.\n\n**Invariants:**\nThe structure supports the integrity of ownership. For example, each `MaintenanceReport`, `WorkOrder`, and `SparePartOrder` includes the `equipmentId`, maintaining a clear relationship with the associated equipment."
+    ]
   }
 }

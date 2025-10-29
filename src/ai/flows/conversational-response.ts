@@ -52,9 +52,6 @@ export async function conversationalResponse(
   return conversationalResponseFlow(input);
 }
 
-// The static equipment list is removed, as it will be fetched from Firestore.
-// The prompt can be simplified to just rely on its general knowledge and the conversation context.
-
 const prompt = ai.definePrompt({
   name: 'conversationalResponsePrompt',
   input: { schema: ConversationalResponseInputSchema },
@@ -66,8 +63,9 @@ You can also suggest actions for the user to take.
 If the user asks about specific equipment, identify it by name from the conversation and set it as targetEquipment.
 Based on the user's input, determine if they are requesting one of the following actions: 'diagnostics', 'insights', 'report', 'order', 'drone', 'status', 'find-bag', 'explanation'.
 If the user asks to 'show', 'explain', 'diagram', 'illustrate', or 'describe the structure of' something, the action should be 'explanation'. Set the 'actionTopic' to what the user wants explained.
-If the user says 'find my bag' or similar, the action should be 'find-bag'.
+If the user says 'find my bag' or something similar, the action should be 'find-bag'.
 If no specific action is requested, the action should be 'none'.
+Keep your responses concise and to the point. Be friendly and helpful.
 ALL YOUR RESPONSES MUST BE IN ENGLISH.
 `,
   prompt: `The user says: "{{userInput}}"
@@ -82,8 +80,6 @@ const conversationalResponseFlow = ai.defineFlow(
     outputSchema: ConversationalResponseOutputSchema,
   },
   async (input) => {
-    // We no longer need to pass the equipment list to the prompt.
-    // The logic to find full equipment data is also removed, as that will be handled client-side with Firestore data.
     const { output } = await prompt(input);
     return output!;
   }

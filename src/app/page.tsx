@@ -9,7 +9,8 @@ export type View = 'dashboard' | 'report' | 'order' | 'drone' | 'find-bag';
 
 export default function Home() {
   const [selectedEquipment, setSelectedEquipment] = useState<Equipment | null>(null);
-  const [dashboardView, setDashboardView] = useState<View>('dashboard');
+  // The dashboard view is no longer needed as the dashboard panel is removed.
+  // const [dashboardView, setDashboardView] = useState<View>('dashboard');
 
   return (
     <FirebaseClientProvider>
@@ -19,8 +20,7 @@ export default function Home() {
           <div className="flex-1 flex flex-col">
             <ChatPanel 
               selectedEquipment={selectedEquipment}
-              setSelectedEquipment={setSelectedEquipment} 
-              setDashboardView={setDashboardView} 
+              setSelectedEquipment={setSelectedEquipment}
             />
           </div>
         </main>
