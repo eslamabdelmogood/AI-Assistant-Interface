@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Briefcase, Mic, Send, Square, TriangleAlert } from 'lucide-react';
-import { Textarea } from '../ui/textarea';
+import { Textarea } from '@/components/ui/textarea';
 import { useRef, useEffect } from 'react';
 
 type ChatInputProps = {

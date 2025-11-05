@@ -88,8 +88,8 @@ const textToSpeechFlow = ai.defineFlow(
           voiceConfig: {
             prebuiltVoiceConfig: { voiceName },
           },
-          languageCode: languageCode || 'en-US',
         },
+        languageCode: languageCode || 'en-US',
       },
       prompt: text,
     });
