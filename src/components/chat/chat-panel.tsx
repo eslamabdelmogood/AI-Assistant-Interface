@@ -4,8 +4,14 @@ import { getConversationalResponse, explain, textToSpeech } from '@/app/actions'
 import ChatMessages from './chat-messages';
 import ChatInput from './chat-input';
 import { useToast } from '@/hooks/use-toast';
-import { DUMMY_EQUIPMENT, type Equipment } from '@/lib/data';
 import { VisualExplanation } from './message-components';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '../ui/dialog';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
+import { Button } from '../ui/button';
+import Image from 'next/image';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { Loader } from 'lucide-react';
 
 export type Message = {
   id: string;
@@ -38,11 +44,12 @@ export default function ChatPanel() {
   
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   
-  // State to control the 'Find Bag' dialog
   const [isFindBagDialogOpen, setIsFindBagDialogOpen] = useState(false);
-
-  const equipments = DUMMY_EQUIPMENT;
-  const isLoadingEquipments = false;
+  const [showBagLocation, setShowBagLocation] = useState(false);
+  const [isFindingBag, setIsFindingBag] = useState(false);
+  const [bagId, setBagId] = useState('');
+  const bagImage = PlaceHolderImages.find(p => p.id === 'smart-bag');
+  const factoryMapImage = PlaceHolderImages.find(p => p.id === 'factory-map');
 
 
   useEffect(() => {
@@ -149,16 +156,15 @@ export default function ChatPanel() {
       
       const { response, action, actionTopic } = res.data;
 
-      // Handle simple text response first
       if (response) {
         const assistantMessage = addMessage('assistant', response);
         await handleTextToSpeech(response, assistantMessage.id);
       }
       
       if (action === 'find-bag') {
-        // This is a simplified version, as the dialog is removed.
-        const findBagMessage = addMessage('assistant', "I can help with that. What is the ID of the bag you are looking for?");
-        await handleTextToSpeech("I can help with that. What is the ID of the bag you are looking for?", findBagMessage.id);
+        setIsFindBagDialogOpen(true);
+        const findBagMessage = addMessage('assistant', "I can help with that. Please enter the ID of the bag you are looking for in the dialog.");
+        await handleTextToSpeech("I can help with that. Please enter the ID of the bag you are looking for in the dialog.", findBagMessage.id);
         setIsLoading(false);
         return;
       }
@@ -181,22 +187,105 @@ export default function ChatPanel() {
     }
   };
 
+  const handleFindBag = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!bagId) return;
+
+    setIsFindingBag(true);
+    // Simulate a delay for finding the bag
+    setTimeout(() => {
+      setIsFindingBag(false);
+      setIsFindBagDialogOpen(false);
+      setShowBagLocation(true);
+    }, 1500);
+  };
+
 
   return (
     <div className="flex h-full w-full flex-col bg-card border-r">
        <div className="flex items-center justify-between p-4 border-b">
         <h2 className="text-xl font-semibold">Conversational AI</h2>
        </div>
-      <ChatMessages messages={messages} isLoading={isLoading || isLoadingEquipments} scrollAreaRef={scrollAreaRef}/>
+      <ChatMessages messages={messages} isLoading={isLoading} scrollAreaRef={scrollAreaRef}/>
       <ChatInput 
         input={input} 
         setInput={setInput} 
         handleSendMessage={handleSendMessage} 
-        isLoading={isLoading || isLoadingEquipments} 
+        isLoading={isLoading}
         isRecording={isRecording} 
         toggleRecording={toggleRecording}
         setIsFindBagDialogOpen={setIsFindBagDialogOpen}
       />
+       <Dialog open={isFindBagDialogOpen} onOpenChange={setIsFindBagDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Find My Smart Bag</DialogTitle>
+            <DialogDescription>
+              Enter the ID of your smart bag to locate it on the factory floor.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleFindBag}>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="bag-id" className="text-right">
+                  Bag ID
+                </Label>
+                <Input
+                  id="bag-id"
+                  value={bagId}
+                  onChange={(e) => setBagId(e.target.value)}
+                  className="col-span-3"
+                  placeholder="e.g., BAG-007"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button type="submit" disabled={!bagId || isFindingBag}>
+                {isFindingBag && <Loader className="mr-2 h-4 w-4 animate-spin" />}
+                Find Bag
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showBagLocation} onOpenChange={setShowBagLocation}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Smart Bag Location</DialogTitle>
+            <DialogDescription>
+              We've located bag <span className="font-bold">{bagId}</span> in Sector 7, near the main assembly line.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="relative aspect-[16/9] mt-4 rounded-lg overflow-hidden border">
+            {factoryMapImage ? (
+                <Image
+                    src={factoryMapImage.imageUrl}
+                    alt="Factory map showing bag location"
+                    fill
+                    className="object-cover"
+                    data-ai-hint={factoryMapImage.imageHint}
+                />
+            ) : <div className="bg-muted w-full h-full flex items-center justify-center">Map not available</div>}
+            {bagImage && (
+                <div className="absolute bottom-1/4 right-1/3">
+                    <div className="relative w-24 h-24">
+                        <Image
+                            src={bagImage.imageUrl}
+                            alt="Smart bag"
+                            fill
+                            className="object-contain drop-shadow-2xl"
+                            data-ai-hint={bagImage.imageHint}
+                        />
+                        <div className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center">
+                            {bagId}
+                        </div>
+                    </div>
+                </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

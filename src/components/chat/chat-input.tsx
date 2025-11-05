@@ -2,10 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Briefcase, Mic, Send, Square, TriangleAlert } from 'lucide-react';
 import { Textarea } from '../ui/textarea';
-import { useRef, useEffect, useState } from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
+import { useRef, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
 type ChatInputProps = {
@@ -20,7 +17,6 @@ type ChatInputProps = {
 
 export default function ChatInput({ input, setInput, handleSendMessage, isLoading, isRecording, toggleRecording, setIsFindBagDialogOpen }: ChatInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [bagId, setBagId] = useState('');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -46,7 +42,7 @@ export default function ChatInput({ input, setInput, handleSendMessage, isLoadin
   };
 
   return (
-    <div className="border-t border-border p-4 bg-card space-y-4">
+    <div className="border-t border-border bg-card p-4 pb-6 space-y-4">
       {isRecording && (
         <div className="flex justify-center items-center h-8">
           <div className="flex items-end gap-1">
@@ -59,6 +55,30 @@ export default function ChatInput({ input, setInput, handleSendMessage, isLoadin
         </div>
       )}
       <form onSubmit={handleSendMessage} className="relative flex items-end gap-2">
+        <div className="flex items-end gap-2">
+            <TooltipProvider>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                    <Button type="button" size="icon" variant="outline" className="text-muted-foreground hover:text-foreground shrink-0" disabled={isLoading} onClick={() => setIsFindBagDialogOpen(true)}>
+                        <Briefcase className="h-5 w-5" />
+                    </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                    <p>Find my smart bag</p>
+                    </TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                    <Button type="button" size="icon" variant="destructive" className="rounded-full shrink-0" disabled={isLoading} onClick={handleEmergency}>
+                        <TriangleAlert className="h-5 w-5" />
+                    </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        <p>Emergency</p>
+                    </TooltipContent>
+                </Tooltip>
+            </TooltipProvider>
+        </div>
         <div className="flex-1 relative">
             <Textarea
               ref={textareaRef}
@@ -84,33 +104,11 @@ export default function ChatInput({ input, setInput, handleSendMessage, isLoadin
                 </Tooltip>
                 </TooltipProvider>
 
-                <Button type="submit" size="icon" variant="ghost" className="text-muted-foreground hover:text-accent hover:bg-transparent" disabled={isLoading || !input.trim()}>
+                <Button type="submit" size="icon" variant="ghost" className="text-accent-foreground hover:bg-transparent" disabled={isLoading || !input.trim()}>
                 <Send className="h-5 w-5" />
                 </Button>
             </div>
         </div>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button type="button" size="icon" variant="outline" className="text-muted-foreground hover:text-foreground" disabled={isLoading} onClick={() => setIsFindBagDialogOpen(true)}>
-                <Briefcase className="h-5 w-5" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Find my smart bag</p>
-            </TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button type="button" size="icon" variant="destructive" className="rounded-full" disabled={isLoading} onClick={handleEmergency}>
-                  <TriangleAlert className="h-5 w-5" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-                <p>Emergency</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
       </form>
        <p className="text-xs text-muted-foreground text-center">
           Press Enter to send, Shift+Enter for a new line.

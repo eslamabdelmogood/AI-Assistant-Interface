@@ -20,8 +20,9 @@ export default function ChatMessages({ messages, isLoading, scrollAreaRef }: Cha
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
+    // This allows the parent component to get a reference to the viewport element
     if (typeof scrollAreaRef === 'function') {
-      scrollAreaRef(internalScrollAreaf.current);
+      scrollAreaRef(internalScrollAreaRef.current);
     } else if (scrollAreaRef) {
       scrollAreaRef.current = internalScrollAreaRef.current;
     }
@@ -29,8 +30,12 @@ export default function ChatMessages({ messages, isLoading, scrollAreaRef }: Cha
 
 
   useEffect(() => {
+    // Auto-scroll to bottom
     if (internalScrollAreaRef.current) {
-        internalScrollAreaRef.current.scrollTo({ top: internalScrollAreaRef.current.scrollHeight, behavior: 'smooth' });
+        const viewport = internalScrollAreaRef.current.children[0] as HTMLDivElement;
+        if(viewport) {
+          viewport.scrollTo({ top: viewport.scrollHeight, behavior: 'smooth' });
+        }
     }
   }, [messages, isLoading]);
 
@@ -42,7 +47,7 @@ export default function ChatMessages({ messages, isLoading, scrollAreaRef }: Cha
   };
 
   return (
-    <ScrollArea className="flex-1" viewportRef={internalScrollAreaRef}>
+    <ScrollArea className="flex-1" ref={internalScrollAreaRef}>
        <audio ref={audioRef} />
       <div className="p-4 md:p-6 space-y-6">
         {messages.map((message) => (
@@ -58,7 +63,7 @@ export default function ChatMessages({ messages, isLoading, scrollAreaRef }: Cha
               className={cn(
                 "max-w-xl rounded-lg p-3 text-sm flex items-center gap-2 shadow-sm",
                 message.role === 'user'
-                  ? "bg-accent text-accent-foreground"
+                  ? "bg-primary text-primary-foreground"
                   : "bg-card border"
               )}
             >
