@@ -9,7 +9,7 @@ import type { View } from '@/app/page';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection } from 'firebase/firestore';
 import { DUMMY_EQUIPMENT, type Equipment } from '@/lib/data';
-import { PanelLeft, PanelRight } from 'lucide-react';
+import { ArrowDown, ArrowUp, PanelLeft, PanelRight } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 
@@ -49,6 +49,8 @@ export default function ChatPanel({ selectedEquipment, setSelectedEquipment, isP
   const { toast } = useToast();
   const [isRecording, setIsRecording] = useState(false);
   const recognitionRef = useRef<any>(null);
+  
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
   
   // State to control the 'Find Bag' dialog
   const [isFindBagDialogOpen, setIsFindBagDialogOpen] = useState(false);
@@ -282,10 +284,40 @@ export default function ChatPanel({ selectedEquipment, setSelectedEquipment, isP
     }
   };
 
+ const handleScroll = (direction: 'up' | 'down') => {
+    if (scrollAreaRef.current) {
+        const { scrollTop, clientHeight } = scrollAreaRef.current;
+        const scrollAmount = clientHeight * 0.8; // Scroll by 80% of the visible height
+        const newScrollTop = direction === 'up' ? scrollTop - scrollAmount : scrollTop + scrollAmount;
+        scrollAreaRef.current.scrollTo({ top: newScrollTop, behavior: 'smooth' });
+    }
+ };
+
+
   return (
     <div className="flex h-full flex-col bg-card border-r">
        <div className="flex items-center justify-between p-4 border-b">
-         <h2 className="text-xl font-semibold">Conversational AI</h2>
+        <div className='flex items-center gap-2'>
+            <h2 className="text-xl font-semibold">Conversational AI</h2>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleScroll('up')}>
+                    <ArrowUp className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent><p>Scroll Up</p></TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleScroll('down')}>
+                    <ArrowDown className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent><p>Scroll Down</p></TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+        </div>
          <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -299,7 +331,7 @@ export default function ChatPanel({ selectedEquipment, setSelectedEquipment, isP
             </Tooltip>
          </TooltipProvider>
        </div>
-      <ChatMessages messages={messages} isLoading={isLoading || isLoadingEquipments} />
+      <ChatMessages messages={messages} isLoading={isLoading || isLoadingEquipments} scrollAreaRef={scrollAreaRef}/>
       <ChatInput 
         input={input} 
         setInput={setInput} 

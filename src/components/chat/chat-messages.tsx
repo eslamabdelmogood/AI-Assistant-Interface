@@ -5,22 +5,32 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import Logo from '../icons/logo';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, type ForwardedRef } from 'react';
 import { Volume2 } from 'lucide-react';
 import { Button } from '../ui/button';
 
 type ChatMessagesProps = {
   messages: Message[];
   isLoading: boolean;
+  scrollAreaRef: ForwardedRef<HTMLDivElement>;
 };
 
-export default function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
+export default function ChatMessages({ messages, isLoading, scrollAreaRef }: ChatMessagesProps) {
+  const internalScrollAreaRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    if (scrollAreaRef.current) {
-      scrollAreaRef.current.scrollTo({ top: scrollAreaRef.current.scrollHeight, behavior: 'smooth' });
+    if (typeof scrollAreaRef === 'function') {
+      scrollAreaRef(internalScrollAreaRef.current);
+    } else if (scrollAreaRef) {
+      scrollAreaRef.current = internalScrollAreaRef.current;
+    }
+  }, [scrollAreaRef]);
+
+
+  useEffect(() => {
+    if (internalScrollAreaRef.current) {
+        internalScrollAreaRef.current.scrollTo({ top: internalScrollAreaRef.current.scrollHeight, behavior: 'smooth' });
     }
   }, [messages, isLoading]);
 
@@ -32,7 +42,7 @@ export default function ChatMessages({ messages, isLoading }: ChatMessagesProps)
   };
 
   return (
-    <ScrollArea className="flex-1" ref={scrollAreaRef}>
+    <ScrollArea className="flex-1" viewportRef={internalScrollAreaRef}>
        <audio ref={audioRef} />
       <div className="p-4 md:p-6 space-y-6">
         {messages.map((message) => (
