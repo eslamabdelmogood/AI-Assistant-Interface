@@ -295,7 +295,7 @@ export default function ChatPanel({ selectedEquipment, setSelectedEquipment, isP
 
 
   return (
-    <div className="flex h-full flex-col bg-card border-r">
+    <div className="flex h-full flex-col bg-card border-r pb-4">
        <div className="flex items-center justify-between p-4 border-b">
         <div className='flex items-center gap-2'>
             <h2 className="text-xl font-semibold">Conversational AI</h2>
