@@ -15,8 +15,8 @@ import { type Equipment } from '@/../docs/backend-schema';
 import { AlertCircle, CheckCircle, Factory, HelpCircle, Settings } from 'lucide-react';
 import { Button } from '../ui/button';
 import { useState, useMemo } from 'react';
-import { cn } from '@/lib/utils';
 import { Badge } from '../ui/badge';
+import { ScrollArea } from '../ui/scroll-area';
 
 type AppSidebarProps = {
   selectedEquipment: Equipment | null;
@@ -86,34 +86,36 @@ export default function AppSidebar({ selectedEquipment, setSelectedEquipment }: 
             <Button size="sm" variant={filter === 'needs-attention' ? 'primary' : 'ghost'} onClick={() => setFilter('needs-attention')} className="h-7 text-xs px-1">Needs Attention</Button>
         </div>
       </SidebarHeader>
-      <SidebarContent className="p-2">
-        <SidebarMenu>
-          {isLoadingEquipments && (
-            <>
-              <SidebarMenuSkeleton showIcon />
-              <SidebarMenuSkeleton showIcon />
-              <SidebarMenuSkeleton showIcon />
-            </>
-          )}
-          {filteredEquipments && filteredEquipments.map((equipment) => (
-            <SidebarMenuItem key={equipment.id}>
-              <SidebarMenuButton
-                isActive={selectedEquipment?.id === equipment.id}
-                onClick={() => setSelectedEquipment(equipment)}
-                className="h-auto py-2 flex-col items-start"
-              >
-                <div className="flex w-full justify-between items-center">
-                    <div className="flex items-center gap-2">
-                        {getStatusIcon(equipment.status)}
-                        <span className="font-medium">{equipment.name}</span>
+      <SidebarContent>
+        <ScrollArea className="h-full p-2">
+            <SidebarMenu>
+            {isLoadingEquipments && (
+                <>
+                <SidebarMenuSkeleton showIcon />
+                <SidebarMenuSkeleton showIcon />
+                <SidebarMenuSkeleton showIcon />
+                </>
+            )}
+            {filteredEquipments && filteredEquipments.map((equipment) => (
+                <SidebarMenuItem key={equipment.id}>
+                <SidebarMenuButton
+                    isActive={selectedEquipment?.id === equipment.id}
+                    onClick={() => setSelectedEquipment(equipment)}
+                    className="h-auto py-2 flex-col items-start"
+                >
+                    <div className="flex w-full justify-between items-center">
+                        <div className="flex items-center gap-2">
+                            {getStatusIcon(equipment.status)}
+                            <span className="font-medium">{equipment.name}</span>
+                        </div>
+                        <Badge variant={getStatusVariant(equipment.status)} className="capitalize text-xs">{equipment.status}</Badge>
                     </div>
-                    <Badge variant={getStatusVariant(equipment.status)} className="capitalize text-xs">{equipment.status}</Badge>
-                </div>
-                <div className="pl-6 text-xs text-muted-foreground">{equipment.type} - {equipment.location}</div>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
-        </SidebarMenu>
+                    <div className="pl-6 text-xs text-muted-foreground">{equipment.type} - {equipment.location}</div>
+                </SidebarMenuButton>
+                </SidebarMenuItem>
+            ))}
+            </SidebarMenu>
+        </ScrollArea>
       </SidebarContent>
     </Sidebar>
   );
