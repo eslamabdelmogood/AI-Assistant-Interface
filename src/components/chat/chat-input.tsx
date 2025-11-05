@@ -152,6 +152,10 @@ export default function ChatInput({ input, setInput, handleSendMessage, isLoadin
                     </TooltipContent>
                 </Tooltip>
                 <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2"><TriangleAlert className="h-6 w-6 text-destructive" /> Confirm Emergency</DialogTitle>
+                    <DialogDescription>Your current location will be sent to the command center when you confirm.</DialogDescription>
+                  </DialogHeader>
                   <EmergencyLocation onConfirm={handleEmergency} onCancel={() => setIsEmergencyDialogOpen(false)} />
                 </DialogContent>
               </Dialog>
