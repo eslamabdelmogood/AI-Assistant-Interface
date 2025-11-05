@@ -8,6 +8,7 @@
 
 import { ai } from '@/ai/genkit';
 import { VisualExplanationInputSchema, VisualExplanationOutputSchema, type VisualExplanationInput, type VisualExplanationOutput } from '@/ai/schemas/visual-explanation-schemas';
+import { googleAI } from '@genkit-ai/google-genai';
 
 
 export async function getVisualExplanation(
@@ -26,14 +27,24 @@ const visualExplanationFlow = ai.defineFlow(
   async ({ topic }) => {
 
     const llmResponse = await ai.generate({
-        prompt: `Provide a detailed, technical explanation for an engineer about the following topic: ${topic}. Focus on structure, components, or process.`,
+        prompt: `Provide a detailed, step-by-step solution for an engineer to solve the following problem: ${topic}. Focus on a clear, actionable process.`,
     });
     
     const description = llmResponse.text;
-    const imageUrl = '';
 
     if (!description) {
-        throw new Error('Failed to generate visual explanation.');
+        throw new Error('Failed to generate a solution.');
+    }
+
+    const imageGenResponse = await ai.generate({
+        model: googleAI.model('imagen-4.0-fast-generate-001'),
+        prompt: `Generate a simple, minimalist, black and white line drawing in the style of an IKEA instruction manual that visually explains the following solution: "${description}"`,
+    });
+
+    const imageUrl = imageGenResponse.media?.url;
+
+    if (!imageUrl) {
+        throw new Error('Failed to generate visual explanation image.');
     }
 
     return {
