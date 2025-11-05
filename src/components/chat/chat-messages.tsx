@@ -21,7 +21,7 @@ export default function ChatMessages({ messages, isLoading, scrollAreaRef }: Cha
 
   useEffect(() => {
     if (typeof scrollAreaRef === 'function') {
-      scrollAreaRef(internalScrollAreaRef.current);
+      scrollAreaRef(internalScrollAreaf.current);
     } else if (scrollAreaRef) {
       scrollAreaRef.current = internalScrollAreaRef.current;
     }
@@ -46,20 +46,20 @@ export default function ChatMessages({ messages, isLoading, scrollAreaRef }: Cha
        <audio ref={audioRef} />
       <div className="p-4 md:p-6 space-y-6">
         {messages.map((message) => (
-          <div key={message.id} className={cn("flex items-start gap-4", message.role === 'user' && "justify-end")}>
+          <div key={message.id} className={cn("flex items-start gap-3", message.role === 'user' && "justify-end")}>
             {message.role === 'assistant' && (
               <Avatar className="h-9 w-9 border border-border">
-                <AvatarFallback className="bg-primary/10">
+                <AvatarFallback className="bg-card">
                   <Logo className="h-6 w-6" />
                 </AvatarFallback>
               </Avatar>
             )}
             <div
               className={cn(
-                "max-w-md rounded-lg p-3 text-sm flex items-center gap-2",
+                "max-w-xl rounded-lg p-3 text-sm flex items-center gap-2 shadow-sm",
                 message.role === 'user'
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted"
+                  ? "bg-accent text-accent-foreground"
+                  : "bg-card border"
               )}
             >
               <div className="flex-grow">{message.content}</div>
@@ -77,13 +77,13 @@ export default function ChatMessages({ messages, isLoading, scrollAreaRef }: Cha
           </div>
         ))}
         {isLoading && (
-          <div className="flex items-start gap-4">
+          <div className="flex items-start gap-3">
              <Avatar className="h-9 w-9 border border-border">
-                <AvatarFallback className="bg-primary/10">
+                <AvatarFallback className="bg-card">
                   <Logo className="h-6 w-6" />
                 </AvatarFallback>
               </Avatar>
-            <div className="max-w-md rounded-lg p-3 bg-muted flex items-center space-x-2">
+            <div className="max-w-md rounded-lg p-3 bg-card border shadow-sm flex items-center space-x-2">
                 <span className="h-2 w-2 bg-foreground/50 rounded-full animate-pulse delay-0"></span>
                 <span className="h-2 w-2 bg-foreground/50 rounded-full animate-pulse delay-200"></span>
                 <span className="h-2 w-2 bg-foreground/50 rounded-full animate-pulse delay-400"></span>

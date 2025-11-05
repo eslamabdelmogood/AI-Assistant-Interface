@@ -66,9 +66,9 @@ export default function ChatInput({ input, setInput, handleSendMessage, isLoadin
   };
 
   return (
-    <div className="border-t border-border p-4 bg-card">
+    <div className="border-t border-border p-4 bg-card space-y-4">
       {isRecording && (
-        <div className="flex justify-center items-center h-8 mb-2">
+        <div className="flex justify-center items-center h-8">
           <div className="flex items-end gap-1">
             <span className="h-2 w-2 bg-foreground/80 rounded-full animate-[wave_1.2s_ease-in-out_infinite] delay-0"></span>
             <span className="h-4 w-2 bg-foreground/80 rounded-full animate-[wave_1.2s_ease-in-out_infinite] delay-200"></span>
@@ -79,104 +79,108 @@ export default function ChatInput({ input, setInput, handleSendMessage, isLoadin
         </div>
       )}
       <form onSubmit={handleSendMessage} className="relative flex items-end gap-2">
-        <Textarea
-          ref={textareaRef}
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Ask about equipment, maintenance, or find your tools..."
-          className="flex-1 resize-none overflow-hidden pr-40 py-2.5 min-h-[44px] max-h-48"
-          rows={1}
-          disabled={isLoading}
-        />
-        <div className="absolute inset-y-0 right-2 flex items-end pb-1.5">
-            <TooltipProvider>
-              <Dialog open={isFindBagDialogOpen} onOpenChange={onFindBagOpenChange}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <DialogTrigger asChild>
-                      <Button type="button" size="icon" variant="ghost" className="text-muted-foreground hover:text-foreground" disabled={isLoading}>
-                        <Briefcase className="h-5 w-5" />
-                      </Button>
-                    </DialogTrigger>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Find my smart bag</p>
-                  </TooltipContent>
-                </Tooltip>
-                 <DialogContent className="sm:max-w-md">
-                    {showBagLocation ? (
-                       <FindMyBag setDashboardView={() => onFindBagOpenChange(false)} />
-                    ) : (
-                      <>
-                        <DialogHeader>
-                          <DialogTitle>Find Smart Bag</DialogTitle>
-                          <DialogDescription>
-                            Enter the ID of your smart bag to locate it on the factory floor.
-                          </DialogDescription>
-                        </DialogHeader>
-                        <form onSubmit={handleFindBagSubmit}>
-                          <div className="grid gap-4 py-4">
-                            <div className="grid grid-cols-4 items-center gap-4">
-                              <Label htmlFor="bag-id" className="text-right">
-                                Bag ID
-                              </Label>
-                              <Input
-                                id="bag-id"
-                                value={bagId}
-                                onChange={(e) => setBagId(e.target.value)}
-                                className="col-span-3"
-                                placeholder="e.g., T-837"
-                              />
-                            </div>
-                          </div>
-                          <DialogFooter>
-                            <Button type="submit" disabled={!bagId}>Find</Button>
-                          </DialogFooter>
-                        </form>
-                      </>
-                    )}
-                  </DialogContent>
-              </Dialog>
-              <Dialog open={isEmergencyDialogOpen} onOpenChange={setIsEmergencyDialogOpen}>
-                <Tooltip>
+        <div className="flex-1 relative">
+            <Textarea
+              ref={textareaRef}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Ask about equipment, maintenance, or find your tools..."
+              className="flex-1 resize-none overflow-hidden pr-20 py-2.5 min-h-[44px] max-h-48 bg-background"
+              rows={1}
+              disabled={isLoading}
+            />
+            <div className="absolute inset-y-0 right-2 flex items-end pb-1.5">
+                <TooltipProvider>
+                    <Tooltip>
                     <TooltipTrigger asChild>
-                      <DialogTrigger asChild>
-                        <Button type="button" size="icon" variant="destructive" className="rounded-full" disabled={isLoading}>
-                          <TriangleAlert className="h-5 w-5" />
-                        </Button>
-                      </DialogTrigger>
+                    <Button type="button" size="icon" variant="ghost" className="text-muted-foreground hover:text-foreground" disabled={isLoading} onClick={toggleRecording}>
+                        {isRecording ? <Square className="h-5 w-5 text-red-500" /> : <Mic className="h-5 w-5" />}
+                    </Button>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>Emergency</p>
+                    <p>{isRecording ? 'Stop recording' : 'Start recording'}</p>
                     </TooltipContent>
                 </Tooltip>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2"><TriangleAlert className="h-6 w-6 text-destructive" /> Confirm Emergency</DialogTitle>
-                    <DialogDescription>Your current location will be sent to the command center when you confirm.</DialogDescription>
-                  </DialogHeader>
-                  <EmergencyLocation onConfirm={handleEmergency} onCancel={() => setIsEmergencyDialogOpen(false)} />
-                </DialogContent>
-              </Dialog>
-              <Tooltip>
+                </TooltipProvider>
+
+                <Button type="submit" size="icon" variant="ghost" className="text-muted-foreground hover:text-accent hover:bg-transparent" disabled={isLoading || !input.trim()}>
+                <Send className="h-5 w-5" />
+                </Button>
+            </div>
+        </div>
+        <TooltipProvider>
+            <Dialog open={isFindBagDialogOpen} onOpenChange={onFindBagOpenChange}>
+            <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button type="button" size="icon" variant="ghost" className="text-muted-foreground hover:text-foreground" disabled={isLoading} onClick={toggleRecording}>
-                    {isRecording ? <Square className="h-5 w-5 text-red-500" /> : <Mic className="h-5 w-5" />}
-                  </Button>
+                <DialogTrigger asChild>
+                    <Button type="button" size="icon" variant="outline" className="text-muted-foreground hover:text-foreground" disabled={isLoading}>
+                    <Briefcase className="h-5 w-5" />
+                    </Button>
+                </DialogTrigger>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>{isRecording ? 'Stop recording' : 'Start recording'}</p>
+                <p>Find my smart bag</p>
                 </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-
-            <Button type="submit" size="icon" variant="ghost" className="text-muted-foreground hover:text-accent hover:bg-transparent" disabled={isLoading || !input.trim()}>
-              <Send className="h-5 w-5" />
-            </Button>
-        </div>
+            </Tooltip>
+                <DialogContent className="sm:max-w-md">
+                {showBagLocation ? (
+                    <FindMyBag setDashboardView={() => onFindBagOpenChange(false)} />
+                ) : (
+                    <>
+                    <DialogHeader>
+                        <DialogTitle>Find Smart Bag</DialogTitle>
+                        <DialogDescription>
+                        Enter the ID of your smart bag to locate it on the factory floor.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={handleFindBagSubmit}>
+                        <div className="grid gap-4 py-4">
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="bag-id" className="text-right">
+                            Bag ID
+                            </Label>
+                            <Input
+                            id="bag-id"
+                            value={bagId}
+                            onChange={(e) => setBagId(e.target.value)}
+                            className="col-span-3"
+                            placeholder="e.g., T-837"
+                            />
+                        </div>
+                        </div>
+                        <DialogFooter>
+                        <Button type="submit" disabled={!bagId}>Find</Button>
+                        </DialogFooter>
+                    </form>
+                    </>
+                )}
+                </DialogContent>
+            </Dialog>
+            <Dialog open={isEmergencyDialogOpen} onOpenChange={setIsEmergencyDialogOpen}>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <DialogTrigger asChild>
+                    <Button type="button" size="icon" variant="destructive" className="rounded-full" disabled={isLoading}>
+                        <TriangleAlert className="h-5 w-5" />
+                    </Button>
+                    </DialogTrigger>
+                </TooltipTrigger>
+                <TooltipContent>
+                    <p>Emergency</p>
+                </TooltipContent>
+            </Tooltip>
+            <DialogContent>
+                <DialogHeader>
+                <DialogTitle className="flex items-center gap-2"><TriangleAlert className="h-6 w-6 text-destructive" /> Confirm Emergency</DialogTitle>
+                <DialogDescription>Your current location will be sent to the command center when you confirm.</DialogDescription>
+                </DialogHeader>
+                <EmergencyLocation onConfirm={handleEmergency} onCancel={() => setIsEmergencyDialogOpen(false)} />
+            </DialogContent>
+            </Dialog>
+        </TooltipProvider>
       </form>
-       <p className="text-xs text-muted-foreground mt-2 text-center">
+       <p className="text-xs text-muted-foreground text-center">
           Press Enter to send, Shift+Enter for a new line.
         </p>
     </div>
