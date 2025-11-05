@@ -11,10 +11,11 @@ import { z } from 'zod';
 
 export const TextToSpeechInputSchema = z.object({
   text: z.string().describe("The text to convert to speech."),
+  languageCode: z.string().optional().describe("The IETF language tag for the text (e.g., 'en-US', 'es-ES'). If not provided, 'en-US' will be used as a default."),
 });
 export type TextToSpeechInput = z.infer<typeof TextToSpeechInputSchema>;
 
 export const TextToSpeechOutputSchema = z.object({
-  audio: z.string().describe("The base64 encoded audio file."),
+  audio: z.string().describe("The base64 encoded audio file in WAV format."),
 });
 export type TextToSpeechOutput = z.infer<typeof TextToSpeechOutputSchema>;

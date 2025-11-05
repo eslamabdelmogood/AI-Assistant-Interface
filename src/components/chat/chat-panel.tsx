@@ -1,4 +1,3 @@
-
 'use client';
 import { useState, useRef, useEffect } from 'react';
 import { getConversationalResponse, textToSpeech } from '@/app/actions';
@@ -26,7 +25,7 @@ export default function ChatPanel() {
     {
       id: 'init',
       role: 'assistant',
-      content: "Hello! I'm your Green Box assistant. You can ask me things like 'What is the status of CNC-001?' or 'Show me the maintenance log for the main conveyor belt.'",
+      content: "Hello! I'm your Green Box assistant. How can I help you today?",
     },
   ]);
   const [input, setInput] = useState('');
@@ -96,11 +95,10 @@ export default function ChatPanel() {
     return newMessage;
   };
   
-  const handleTextToSpeech = async (text: string, messageId: string) => {
-    // Don't try to generate speech for React components
+  const handleTextToSpeech = async (text: string, languageCode: string, messageId: string) => {
     if (typeof text !== 'string') return;
     try {
-      const res = await textToSpeech({ text });
+      const res = await textToSpeech({ text, languageCode });
       if (res.success && res.data?.audio) {
         setMessages(prev => prev.map(m => m.id === messageId ? { ...m, audioUrl: res.data.audio } : m));
       } else {
@@ -132,18 +130,20 @@ export default function ChatPanel() {
         throw new Error(res.error || 'Failed to get a response.');
       }
       
-      const { response, action } = res.data;
+      const { response, languageCode, action } = res.data;
 
       if (response) {
         const assistantMessage = addMessage('assistant', response);
-        await handleTextToSpeech(response, assistantMessage.id);
+        if (languageCode) {
+          await handleTextToSpeech(response, languageCode, assistantMessage.id);
+        }
       }
       
       if (action === 'find-bag') {
         setIsFindBagDialogOpen(true);
-        if (!response) { // Only add this message if the main response didn't already guide the user
+        if (!response) {
             const findBagMessage = addMessage('assistant', "I can help with that. Please enter the ID of the bag you are looking for in the dialog.");
-            await handleTextToSpeech("I can help with that. Please enter the ID of the bag you are looking for in the dialog.", findBagMessage.id);
+            await handleTextToSpeech("I can help with that. Please enter the ID of the bag you are looking for in the dialog.", 'en-US', findBagMessage.id);
         }
       }
       
