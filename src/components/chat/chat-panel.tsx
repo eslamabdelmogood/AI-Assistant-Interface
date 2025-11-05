@@ -9,7 +9,7 @@ import type { View } from '@/app/page';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection } from 'firebase/firestore';
 import { DUMMY_EQUIPMENT, type Equipment } from '@/lib/data';
-import { PanelLeft } from 'lucide-react';
+import { PanelLeft, PanelRight } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 
@@ -148,15 +148,22 @@ export default function ChatPanel({ selectedEquipment, setSelectedEquipment, isP
 
   const handleAction = async (action: string, equipment: Equipment) => {
     setIsLoading(true);
-    addMessage('user', `Perform action: ${action} on ${equipment.name}`);
+    const actionMessage = addMessage('user', `Perform action: ${action} on ${equipment.name}`);
+    await handleTextToSpeech(`Performing action: ${action} on ${equipment.name}`, actionMessage.id);
     
     switch (action) {
-        case 'report':
-            addMessage('assistant', <MaintenanceReport equipment={equipment} />);
+        case 'report': {
+            const tempId = crypto.randomUUID();
+            const message = addMessage('assistant', <MaintenanceReport equipment={equipment} />, tempId);
+            await handleTextToSpeech(`Here is the maintenance report for ${equipment.name}`, message.id);
             break;
-        case 'order':
-            addMessage('assistant', <OrderParts equipment={equipment} addMessage={addMessage} />);
+        }
+        case 'order':{
+            const tempId = crypto.randomUUID();
+            const message = addMessage('assistant', <OrderParts equipment={equipment} addMessage={addMessage} />, tempId);
+            await handleTextToSpeech(`I can order a Vibration Sensor for ${equipment.name}. Please confirm.`, message.id);
             break;
+        }
         case 'diagnostics': {
             const tempId = crypto.randomUUID();
             addMessage('assistant', `Running diagnostics for ${equipment.name}...`, tempId);
@@ -169,8 +176,11 @@ export default function ChatPanel({ selectedEquipment, setSelectedEquipment, isP
             
             if (res.success && res.data) {
                 setMessages(prev => prev.map(m => m.id === tempId ? { ...m, content: res.data.diagnosis } : m));
+                await handleTextToSpeech(res.data.diagnosis, tempId);
             } else {
-                 setMessages(prev => prev.map(m => m.id === tempId ? { ...m, content: `Failed to run diagnostics. ${res.error}` } : m));
+                 const errorContent = `Failed to run diagnostics. ${res.error}`;
+                 setMessages(prev => prev.map(m => m.id === tempId ? { ...m, content: errorContent } : m));
+                 await handleTextToSpeech(errorContent, tempId);
             }
             break;
         }
@@ -180,8 +190,11 @@ export default function ChatPanel({ selectedEquipment, setSelectedEquipment, isP
             const res = await getInsights({ equipmentId: equipment.id });
             if (res.success && res.data) {
                 setMessages(prev => prev.map(m => m.id === tempId ? { ...m, content: res.data.insights } : m));
+                await handleTextToSpeech(res.data.insights, tempId);
             } else {
-                setMessages(prev => prev.map(m => m.id === tempId ? { ...m, content: `Failed to generate insights. ${res.error}` } : m));
+                const errorContent = `Failed to generate insights. ${res.error}`;
+                setMessages(prev => prev.map(m => m.id === tempId ? { ...m, content: errorContent } : m));
+                await handleTextToSpeech(errorContent, tempId);
             }
             break;
         }
@@ -235,9 +248,9 @@ export default function ChatPanel({ selectedEquipment, setSelectedEquipment, isP
         switch (action) {
           case 'status':
             if(equipmentToUse.status) {
-              const statusMessage = `${equipmentToUse.name} is currently ${equipmentToUse.status}. I've pulled up its details for you.`;
-              addMessage('assistant', statusMessage);
-              // The dashboard will show the details, no need for action buttons here
+              const statusMessage = `${equipmentToUse.name} is currently ${equipmentToUse.status}. I've pulled up its details for you. What would you like to do?`;
+              const message = addMessage('assistant', <div><p>{statusMessage}</p><ActionButtons equipment={equipmentToUse} onAction={handleAction}/></div>);
+              await handleTextToSpeech(statusMessage, message.id);
             } else {
               addMessage('assistant', `I found ${equipmentToUse.name}, but I don't have live status data for it.`);
             }
@@ -249,7 +262,8 @@ export default function ChatPanel({ selectedEquipment, setSelectedEquipment, isP
             handleAction(action, equipmentToUse);
             break;
           case 'drone':
-             addMessage('assistant', <DroneDispatchConfirmation />);
+             const droneMessage = addMessage('assistant', <DroneDispatchConfirmation />);
+             await handleTextToSpeech("Drone dispatch confirmed. Work order has been created.", droneMessage.id);
              break;
         }
       }
@@ -276,7 +290,7 @@ export default function ChatPanel({ selectedEquipment, setSelectedEquipment, isP
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button variant="ghost" size="icon" onClick={() => setIsPanelOpen(!isPanelOpen)}>
-                    <PanelLeft className="h-5 w-5" />
+                    {isPanelOpen ? <PanelRight className="h-5 w-5" /> : <PanelLeft className="h-5 w-5" />}
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
