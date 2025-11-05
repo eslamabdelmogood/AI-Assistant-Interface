@@ -28,49 +28,43 @@ export async function conversationalResponse(
   return conversationalResponseFlow(input);
 }
 
-const prompt = ai.definePrompt({
-  name: 'conversationalResponsePrompt',
-  input: { schema: ConversationalResponseInputSchema },
-  output: { schema: ConversationalResponseOutputSchema },
-  system: `You are a Senior Command Center AI for industrial maintenance, known as Green Box. You are a highly intelligent and sophisticated multilingual assistant, capable of deep analysis and complex reasoning.
-You are communicating with an experienced engineer. Your primary goal is to provide insightful, accurate, and helpful responses.
-You MUST identify the language of the user's input and respond in that same language.
-Your responses should be professional, clear, and concise, yet comprehensive. Be friendly and exceptionally helpful.
-`,
-  prompt: `The user says: "{{userInput}}"`,
-  config: {
-    safetySettings: [
-        {
-            category: 'HARM_CATEGORY_HATE_SPEECH',
-            threshold: 'BLOCK_NONE',
-        },
-        {
-            category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
-            threshold: 'BLOCK_NONE',
-        },
-        {
-            category: 'HARM_CATEGORY_HARASSMENT',
-            threshold: 'BLOCK_NONE',
-        },
-        {
-            category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
-            threshold: 'BLOCK_NONE',
-        },
-    ]
-  }
-});
-
 const conversationalResponseFlow = ai.defineFlow(
   {
     name: 'conversationalResponseFlow',
     inputSchema: ConversationalResponseInputSchema,
     outputSchema: ConversationalResponseOutputSchema,
   },
-  async (input) => {
-    const { output } = await prompt(input);
-    if (!output) {
-      return { response: "I'm sorry, I couldn't generate a response. Please try again." };
-    }
-    return output;
+  async ({ userInput }) => {
+    const { text } = await ai.generate({
+      prompt: userInput,
+      system: `You are a Senior Command Center AI for industrial maintenance, known as Green Box. You are a highly intelligent and sophisticated multilingual assistant, capable of deep analysis and complex reasoning.
+You are communicating with an experienced engineer. Your primary goal is to provide insightful, accurate, and helpful responses.
+You MUST identify the language of the user's input and respond in that same language.
+Your responses should be professional, clear, and concise, yet comprehensive. Be friendly and exceptionally helpful.`,
+      config: {
+        safetySettings: [
+            {
+                category: 'HARM_CATEGORY_HATE_SPEECH',
+                threshold: 'BLOCK_NONE',
+            },
+            {
+                category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
+                threshold: 'BLOCK_NONE',
+            },
+            {
+                category: 'HARM_CATEGORY_HARASSMENT',
+                threshold: 'BLOCK_NONE',
+            },
+            {
+                category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
+                threshold: 'BLOCK_NONE',
+            },
+        ]
+      }
+    });
+
+    const responseText = text || "I'm sorry, I couldn't generate a response. Please try again.";
+
+    return { response: responseText };
   }
 );

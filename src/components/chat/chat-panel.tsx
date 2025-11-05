@@ -51,6 +51,7 @@ export default function ChatPanel() {
       recognitionRef.current.onresult = (event: any) => {
         const transcript = event.results[0][0].transcript;
         handleSendMessage(new Event('submit') as any, transcript);
+        setIsRecording(false);
       };
 
       recognitionRef.current.onerror = (event: any) => {
@@ -84,8 +85,12 @@ export default function ChatPanel() {
       recognitionRef.current.stop();
       setIsRecording(false);
     } else {
-      recognitionRef.current.start();
-      setIsRecording(true);
+      try {
+        recognitionRef.current.start();
+        setIsRecording(true);
+      } catch (e) {
+        console.error("Could not start recording:", e)
+      }
     }
   };
 
