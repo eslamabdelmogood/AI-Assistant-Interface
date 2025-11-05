@@ -5,17 +5,18 @@ import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Locate, MapPin } from 'lucide-react';
 import type { View } from '@/app/page';
 import { Button } from '../ui/button';
+import { DialogHeader, DialogTitle, DialogDescription } from '../ui/dialog';
 
 export default function FindMyBag({ setDashboardView }: { setDashboardView: (view: View) => void }) {
   const mapImage = PlaceHolderImages.find(img => img.id === 'factory-map');
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Smart Toolkit Bag Location</CardTitle>
-        <CardDescription>Last known location on the factory floor.</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
+    <>
+      <DialogHeader>
+        <DialogTitle>Smart Toolkit Bag Location</DialogTitle>
+        <DialogDescription>Last known location on the factory floor.</DialogDescription>
+      </DialogHeader>
+      <div className="space-y-4 pt-4">
         {mapImage && (
           <div className="aspect-square w-full overflow-hidden rounded-lg border relative">
             <Image
@@ -46,7 +47,7 @@ export default function FindMyBag({ setDashboardView }: { setDashboardView: (vie
         <Button onClick={() => setDashboardView('dashboard')} variant="outline" className="w-full">
             Back to Dashboard
         </Button>
-      </CardContent>
-    </Card>
+      </div>
+    </>
   );
 }
