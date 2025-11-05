@@ -59,6 +59,7 @@ export default function ChatPanel() {
 
   const bagImage = PlaceHolderImages.find(p => p.id === 'smart-bag');
   const factoryMapImage = PlaceHolderImages.find(p => p.id === 'factory-map');
+  const emergencyMapImage = PlaceHolderImages.find(p => p.id === 'emergency-drone-map');
 
 
   useEffect(() => {
@@ -341,22 +342,34 @@ export default function ChatPanel() {
       </AlertDialog>
 
       <Dialog open={showEmergencyResponse} onOpenChange={setShowEmergencyResponse}>
-        <DialogContent className="max-w-md">
-            <DialogHeader>
+        <DialogContent className="max-w-2xl p-0 overflow-hidden">
+            <DialogHeader className="p-6 pb-0">
                 <DialogTitle>Emergency Response Activated</DialogTitle>
                 <DialogDescription>
                     Please remain where you are. You will be reached shortly.
                 </DialogDescription>
             </DialogHeader>
-                <div className="mt-4 flex flex-col items-center justify-center space-y-4">
-                    <div className="flex items-center gap-4 text-6xl font-mono font-bold text-destructive">
+            <div className="relative aspect-video w-full">
+                {emergencyMapImage ? (
+                    <Image
+                        src={emergencyMapImage.imageUrl}
+                        alt="Emergency response map"
+                        fill
+                        className="object-cover"
+                        data-ai-hint={emergencyMapImage.imageHint}
+                    />
+                ) : <div className="bg-muted w-full h-full flex items-center justify-center">Map not available</div>}
+
+                <div className="absolute inset-0 flex flex-col items-center justify-center space-y-4 bg-black/50">
+                    <div className="flex items-center gap-4 text-6xl font-mono font-bold text-white drop-shadow-lg">
                         <Timer className="h-16 w-16" />
                         <span>{formatTime(countdown)}</span>
                     </div>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-white/90 drop-shadow-md">
                         Time until estimated arrival.
                     </p>
                 </div>
+            </div>
         </DialogContent>
       </Dialog>
     </div>
