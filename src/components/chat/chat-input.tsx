@@ -3,12 +3,12 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Briefcase, Mic, Send, Square, TriangleAlert } from 'lucide-react';
 import { Textarea } from '../ui/textarea';
 import { useRef, useEffect, useState } from 'react';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { useToast } from '@/hooks/use-toast';
 import FindMyBag from '../dashboard/find-my-bag';
+import EmergencyLocation from '../dashboard/emergency-location';
 
 type ChatInputProps = {
   input: string;
@@ -26,6 +26,7 @@ export default function ChatInput({ input, setInput, handleSendMessage, isLoadin
   const [bagId, setBagId] = useState('');
   const { toast } = useToast();
   const [showBagLocation, setShowBagLocation] = useState(false);
+  const [isEmergencyDialogOpen, setIsEmergencyDialogOpen] = useState(false);
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -44,7 +45,6 @@ export default function ChatInput({ input, setInput, handleSendMessage, isLoadin
   const handleFindBagSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!bagId) return;
-    // Instead of sending a message, we now show the map directly.
     setShowBagLocation(true);
   }
 
@@ -54,6 +54,7 @@ export default function ChatInput({ input, setInput, handleSendMessage, isLoadin
       description: "Your request has been sent to the command center.",
       variant: "destructive"
     });
+    setIsEmergencyDialogOpen(false);
   };
 
   const onFindBagOpenChange = (open: boolean) => {
@@ -137,32 +138,23 @@ export default function ChatInput({ input, setInput, handleSendMessage, isLoadin
                     )}
                   </DialogContent>
               </Dialog>
-              <AlertDialog>
+              <Dialog open={isEmergencyDialogOpen} onOpenChange={setIsEmergencyDialogOpen}>
                 <Tooltip>
                     <TooltipTrigger asChild>
-                      <AlertDialogTrigger asChild>
+                      <DialogTrigger asChild>
                         <Button type="button" size="icon" variant="destructive" className="rounded-full" disabled={isLoading}>
                           <TriangleAlert className="h-5 w-5" />
                         </Button>
-                      </AlertDialogTrigger>
+                      </DialogTrigger>
                     </TooltipTrigger>
                     <TooltipContent>
                       <p>Emergency</p>
                     </TooltipContent>
                 </Tooltip>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Are you sure this is an emergency?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        This action will immediately dispatch an emergency alert to the command center. Only proceed if there is a genuine emergency.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={handleEmergency}>Confirm Emergency</AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+                <DialogContent>
+                  <EmergencyLocation onConfirm={handleEmergency} onCancel={() => setIsEmergencyDialogOpen(false)} />
+                </DialogContent>
+              </Dialog>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button type="button" size="icon" variant="ghost" className="text-muted-foreground hover:text-foreground" disabled={isLoading} onClick={toggleRecording}>
