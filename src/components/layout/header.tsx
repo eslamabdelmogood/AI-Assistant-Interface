@@ -1,12 +1,12 @@
 import Logo from '@/components/icons/logo';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import { TriangleAlert } from 'lucide-react';
+import { SidebarTrigger } from '@/components/ui/sidebar';
 
 export default function Header() {
   return (
     <header className="flex h-16 shrink-0 items-center justify-between border-b border-border bg-card px-4 md:px-6">
       <div className="flex items-center gap-3">
+        <SidebarTrigger className="md:hidden" />
         <Logo />
         <h1 className="text-lg font-semibold tracking-wider text-foreground">Factory AI</h1>
       </div>
