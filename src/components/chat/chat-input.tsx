@@ -3,7 +3,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Briefcase, Mic, Send, Square, TriangleAlert } from 'lucide-react';
 import { Textarea } from '../ui/textarea';
 import { useRef, useEffect } from 'react';
-import { useToast } from '@/hooks/use-toast';
 
 type ChatInputProps = {
   input: string;
@@ -13,11 +12,11 @@ type ChatInputProps = {
   isRecording: boolean;
   toggleRecording: () => void;
   setIsFindBagDialogOpen: (open: boolean) => void;
+  setIsEmergencyConfirmOpen: (open: boolean) => void;
 };
 
-export default function ChatInput({ input, setInput, handleSendMessage, isLoading, isRecording, toggleRecording, setIsFindBagDialogOpen }: ChatInputProps) {
+export default function ChatInput({ input, setInput, handleSendMessage, isLoading, isRecording, toggleRecording, setIsFindBagDialogOpen, setIsEmergencyConfirmOpen }: ChatInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const { toast } = useToast();
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -31,14 +30,6 @@ export default function ChatInput({ input, setInput, handleSendMessage, isLoadin
       e.preventDefault();
       handleSendMessage(e as any);
     }
-  };
-
-  const handleEmergency = () => {
-    toast({
-      title: "Emergency Alert Sent",
-      description: "Your request has been sent to the command center.",
-      variant: "destructive"
-    });
   };
 
   return (
@@ -69,7 +60,7 @@ export default function ChatInput({ input, setInput, handleSendMessage, isLoadin
                 </Tooltip>
                 <Tooltip>
                     <TooltipTrigger asChild>
-                    <Button type="button" size="icon" variant="destructive" className="rounded-full shrink-0" disabled={isLoading} onClick={handleEmergency}>
+                    <Button type="button" size="icon" variant="destructive" className="rounded-full shrink-0" disabled={isLoading} onClick={() => setIsEmergencyConfirmOpen(true)}>
                         <TriangleAlert className="h-5 w-5" />
                     </Button>
                     </TooltipTrigger>

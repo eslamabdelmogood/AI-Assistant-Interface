@@ -17,6 +17,12 @@
       "description": "A 3D map of a factory floor.",
       "imageUrl": "https://images.unsplash.com/photo-1567943249582-14b35279f893?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxmYWN0b3J5JTIwM2QlMjBtYXB8ZW58MHx8fHwxNzYwODU5NTMxfDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "factory map"
+    },
+    {
+      "id": "emergency-drone-map",
+      "description": "A map showing an emergency drone's route.",
+      "imageUrl": "https://images.unsplash.com/photo-1580197069298-a06959868f03?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxkcm9uZSUyMHJvdXRlJTIwbWFwfGVufDB8fHx8MTc2MDk0MTU3NHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "drone route"
     }
   ]
 }
