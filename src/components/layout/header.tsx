@@ -11,6 +11,7 @@ export default function Header() {
         <h1 className="text-lg font-semibold tracking-wider text-foreground">Factory AI</h1>
       </div>
       <div className="flex items-center gap-4">
+        <SidebarTrigger className="hidden md:flex" />
         <Avatar className="h-9 w-9">
           <AvatarImage src="https://picsum.photos/seed/engineer/40/40" data-ai-hint="person portrait" />
           <AvatarFallback>E</AvatarFallback>
