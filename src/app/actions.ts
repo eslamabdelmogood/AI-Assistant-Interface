@@ -3,8 +3,6 @@
 import { getPredictiveMaintenanceInsights, type PredictiveMaintenanceInsightsInput } from '@/ai/flows/predictive-maintenance-insights';
 import { getRealTimeDiagnostics, type RealTimeDiagnosticsInput } from '@/ai/flows/real-time-diagnostics-from-sensor-data';
 import { conversationalResponse, type ConversationalResponseInput } from '@/ai/flows/conversational-response';
-import { getVisualExplanation } from '@/ai/flows/visual-explanation';
-import type { VisualExplanationInput } from '@/ai/schemas/visual-explanation-schemas';
 import { textToSpeech as englishTextToSpeech } from '@/ai/flows/text-to-speech-english';
 import { TextToSpeechInput } from '@/ai/schemas/text-to-speech-schemas';
 
@@ -35,17 +33,6 @@ export async function getInsights(input: PredictiveMaintenanceInsightsInput) {
   } catch (error) {
     console.error(error);
     return { success: false, error: 'Failed to get predictive insights.' };
-  }
-}
-
-export async function explain(input: VisualExplanationInput) {
-  try {
-    const result = await getVisualExplanation(input);
-    return { success: true, data: result };
-  } catch (error) {
-    console.error(error);
-    const errorMessage = error instanceof Error ? error.message : 'Failed to get visual explanation.';
-    return { success: false, error: errorMessage };
   }
 }
 

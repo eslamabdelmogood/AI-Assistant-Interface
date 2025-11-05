@@ -19,7 +19,7 @@ export type ConversationalResponseInput = z.infer<typeof ConversationalResponseI
 
 const ConversationalResponseOutputSchema = z.object({
   response: z.string().describe('The conversational response to the user in English.'),
-  action: z.enum(['diagnostics', 'insights', 'report', 'order', 'drone', 'status', 'find-bag', 'explanation', 'none']).optional().describe('The suggested action to take.'),
+  action: z.enum(['diagnostics', 'insights', 'report', 'order', 'drone', 'status', 'find-bag', 'none']).optional().describe('The suggested action to take.'),
   actionTopic: z.string().optional().describe('The topic for the action, e.g., what to explain.'),
   targetEquipment: z.object({
     id: z.string(),
@@ -65,8 +65,7 @@ Core Capabilities:
 - Provide expert-level advice and insights.
 - Suggest relevant actions for the user to take.
 - Identify specific equipment by name and set it as 'targetEquipment'.
-- Determine the user's intent and map it to a specific action: 'diagnostics', 'insights', 'report', 'order', 'drone', 'status', 'find-bag', or 'explanation'.
-- If the user asks for a visual or structural breakdown (e.g., 'show', 'explain', 'diagram', 'illustrate', 'describe the structure of'), set the action to 'explanation' and the 'actionTopic' to the subject of the request.
+- Determine the user's intent and map it to a specific action: 'diagnostics', 'insights', 'report', 'order', 'drone', 'status', or 'find-bag'.
 - If the user needs to locate their 'smart bag' or similar, set the action to 'find-bag'.
 - If no specific action is identifiable, set the action to 'none'.
 

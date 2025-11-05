@@ -1,11 +1,10 @@
 
 'use client';
 import { useState, useRef, useEffect } from 'react';
-import { getConversationalResponse, explain, textToSpeech } from '@/app/actions';
+import { getConversationalResponse, textToSpeech } from '@/app/actions';
 import ChatMessages from './chat-messages';
 import ChatInput from './chat-input';
 import { useToast } from '@/hooks/use-toast';
-import { VisualExplanation } from './message-components';
 import { SpecialActions } from './special-actions';
 
 export type Message = {
@@ -97,20 +96,9 @@ export default function ChatPanel() {
     return newMessage;
   };
   
-  const handleExplanation = async (topic: string) => {
-    const tempId = crypto.randomUUID();
-    addMessage('assistant', <div className="p-3 text-sm bg-muted flex items-center space-x-2 rounded-lg">Generating explanation...</div>, tempId);
-
-    const res = await explain({ topic });
-    if (res.success && res.data) {
-      setMessages(prev => prev.map(m => m.id === tempId ? { ...m, content: <VisualExplanation explanation={res.data} /> } : m));
-    } else {
-      const errorContent = `Sorry, I failed to create an explanation. ${res.error || ''}`;
-      setMessages(prev => prev.map(m => m.id === tempId ? { ...m, content: errorContent } : m));
-    }
-  };
-  
   const handleTextToSpeech = async (text: string, messageId: string) => {
+    // Don't try to generate speech for React components
+    if (typeof text !== 'string') return;
     try {
       const res = await textToSpeech({ text });
       if (res.success && res.data?.audio) {
@@ -144,7 +132,7 @@ export default function ChatPanel() {
         throw new Error(res.error || 'Failed to get a response.');
       }
       
-      const { response, action, actionTopic } = res.data;
+      const { response, action } = res.data;
 
       if (response) {
         const assistantMessage = addMessage('assistant', response);
@@ -157,14 +145,8 @@ export default function ChatPanel() {
             const findBagMessage = addMessage('assistant', "I can help with that. Please enter the ID of the bag you are looking for in the dialog.");
             await handleTextToSpeech("I can help with that. Please enter the ID of the bag you are looking for in the dialog.", findBagMessage.id);
         }
-        setIsLoading(false);
-        return;
       }
       
-      if (action === 'explanation' && actionTopic) {
-        await handleExplanation(actionTopic);
-      }
-
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
       const errorId = crypto.randomUUID();
