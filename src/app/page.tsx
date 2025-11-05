@@ -51,24 +51,22 @@ export default function Home() {
                 </SidebarContent>
             </Sidebar>
             <SidebarInset className="flex-1 overflow-auto">
-              {appView === 'maintenance' ? (
-                <div className="flex h-full">
-                  <div className='w-full lg:w-2/5 xl:w-1/3 2xl:w-1/4 h-full'>
-                    <ChatPanel
-                      selectedEquipment={selectedEquipment}
-                      setSelectedEquipment={setSelectedEquipment}
-                      isPanelOpen={isPanelOpen}
-                      setIsPanelOpen={setIsPanelOpen}
-                    />
-                  </div>
+              <div className="flex h-full">
+                <div className={appView === 'maintenance' ? 'w-full lg:w-2/5 xl:w-1/3 2xl:w-1/4 h-full' : 'w-full h-full'}>
+                  <ChatPanel
+                    selectedEquipment={selectedEquipment}
+                    setSelectedEquipment={setSelectedEquipment}
+                    isPanelOpen={isPanelOpen}
+                    setIsPanelOpen={setIsPanelOpen}
+                  />
+                </div>
+                {appView === 'maintenance' && (
                   <DashboardPanel 
                     equipment={selectedEquipment} 
                     isPanelOpen={isPanelOpen}
                   />
-                </div>
-              ) : (
-                <PilgrimView />
-              )}
+                )}
+              </div>
             </SidebarInset>
           </main>
         </div>
