@@ -13,7 +13,7 @@ import { Label } from '../ui/label';
 import { Button } from '../ui/button';
 import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { Loader, Rocket } from 'lucide-react';
+import { Loader, Rocket, Timer } from 'lucide-react';
 import { Badge } from '../ui/badge';
 
 export type Message = {
@@ -21,12 +21,6 @@ export type Message = {
   role: 'user' | 'assistant' | 'system';
   content: React.ReactNode;
   audioUrl?: string;
-};
-
-type EmergencyOrder = {
-  id: string;
-  timestamp: string;
-  status: 'Dispatching' | 'En Route' | 'Arrived';
 };
 
 declare global {
@@ -59,12 +53,12 @@ export default function ChatPanel() {
   const [bagId, setBagId] = useState('');
   
   const [isEmergencyConfirmOpen, setIsEmergencyConfirmOpen] = useState(false);
-  const [emergencyOrder, setEmergencyOrder] = useState<EmergencyOrder | null>(null);
-  const [showEmergencyOrder, setShowEmergencyOrder] = useState(false);
+  const [showEmergencyResponse, setShowEmergencyResponse] = useState(false);
+  const [countdown, setCountdown] = useState(300); // 5 minutes in seconds
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   const bagImage = PlaceHolderImages.find(p => p.id === 'smart-bag');
   const factoryMapImage = PlaceHolderImages.find(p => p.id === 'factory-map');
-  const emergencyDroneMapImage = PlaceHolderImages.find(p => p.id === 'emergency-drone-map');
 
 
   useEffect(() => {
@@ -95,6 +89,19 @@ export default function ChatPanel() {
       };
     }
   }, [toast]);
+  
+  useEffect(() => {
+    if (showEmergencyResponse && countdown > 0) {
+      timerRef.current = setInterval(() => {
+        setCountdown(prev => prev - 1);
+      }, 1000);
+    } else if (countdown === 0) {
+      if (timerRef.current) clearInterval(timerRef.current);
+    }
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [showEmergencyResponse, countdown]);
 
   const toggleRecording = () => {
     if (!recognitionRef.current) {
@@ -214,25 +221,19 @@ export default function ChatPanel() {
   };
   
   const handleConfirmEmergency = () => {
-    const newOrder: EmergencyOrder = {
-        id: `ED-${Math.floor(Math.random() * 10000)}`,
-        timestamp: new Date().toISOString(),
-        status: 'Dispatching',
-    };
-    setEmergencyOrder(newOrder);
-
     toast({
         title: "Emergency Confirmed",
-        description: `Drone dispatch order ${newOrder.id} has been created.`,
+        description: `Help is on the way.`,
     });
 
-    setTimeout(() => {
-        setShowEmergencyOrder(true);
-    }, 500);
-    
-    setTimeout(() => {
-        setEmergencyOrder(prev => prev ? {...prev, status: 'En Route'} : null);
-    }, 3000);
+    setShowEmergencyResponse(true);
+    setCountdown(300); // Reset timer
+  };
+  
+  const formatTime = (totalSeconds: number) => {
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
   };
 
   return (
@@ -327,7 +328,7 @@ export default function ChatPanel() {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action will dispatch an emergency drone to your location. This should only be used for critical situations.
+              This action will dispatch an emergency response. This should only be used for critical situations.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -339,53 +340,23 @@ export default function ChatPanel() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <Dialog open={showEmergencyOrder} onOpenChange={(isOpen) => {
-        if (!isOpen) {
-            setEmergencyOrder(null);
-        }
-        setShowEmergencyOrder(isOpen);
-      }}>
-        <DialogContent className="max-w-3xl">
+      <Dialog open={showEmergencyResponse} onOpenChange={setShowEmergencyResponse}>
+        <DialogContent className="max-w-md">
             <DialogHeader>
-                <DialogTitle>Emergency Drone Dispatch</DialogTitle>
+                <DialogTitle>Emergency Response Activated</DialogTitle>
                 <DialogDescription>
-                An emergency drone is on its way to your location.
+                    Please remain where you are. You will be reached shortly.
                 </DialogDescription>
             </DialogHeader>
-            {emergencyOrder && (
-                <div className="mt-4 space-y-4">
-                    <div className="flex justify-between items-center bg-muted p-3 rounded-lg">
-                        <div>
-                            <p className="text-sm text-muted-foreground">Order ID</p>
-                            <p className="font-mono font-semibold">{emergencyOrder.id}</p>
-                        </div>
-                        <div>
-                            <p className="text-sm text-muted-foreground">Status</p>
-                            <Badge variant={emergencyOrder.status === 'Dispatching' ? 'secondary' : 'default'} className="flex items-center gap-2">
-                                {emergencyOrder.status === 'En Route' && <Rocket className="h-3 w-3" />}
-                                {emergencyOrder.status}
-                            </Badge>
-                        </div>
+                <div className="mt-4 flex flex-col items-center justify-center space-y-4">
+                    <div className="flex items-center gap-4 text-6xl font-mono font-bold text-destructive">
+                        <Timer className="h-16 w-16" />
+                        <span>{formatTime(countdown)}</span>
                     </div>
-                    <div className="relative aspect-video w-full overflow-hidden rounded-lg border">
-                    {emergencyDroneMapImage ? (
-                        <Image
-                            src={emergencyDroneMapImage.imageUrl}
-                            alt="Emergency drone route"
-                            fill
-                            className="object-cover"
-                            data-ai-hint={emergencyDroneMapImage.imageHint}
-                        />
-                    ) : <div className="bg-muted w-full h-full flex items-center justify-center">Map not available</div>}
-                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                        <div className="relative">
-                            <Rocket className="h-8 w-8 text-destructive animate-pulse" />
-                            <div className="absolute h-12 w-12 rounded-full border-2 border-destructive animate-ping" />
-                        </div>
-                    </div>
-                    </div>
+                    <p className="text-sm text-muted-foreground">
+                        Time until estimated arrival.
+                    </p>
                 </div>
-            )}
         </DialogContent>
       </Dialog>
     </div>
