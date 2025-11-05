@@ -7,8 +7,6 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { useToast } from '@/hooks/use-toast';
-import FindMyBag from '../dashboard/find-my-bag';
-import EmergencyLocation from '../dashboard/emergency-location';
 
 type ChatInputProps = {
   input: string;
@@ -17,16 +15,13 @@ type ChatInputProps = {
   isLoading: boolean;
   isRecording: boolean;
   toggleRecording: () => void;
-  isFindBagDialogOpen: boolean;
   setIsFindBagDialogOpen: (open: boolean) => void;
 };
 
-export default function ChatInput({ input, setInput, handleSendMessage, isLoading, isRecording, toggleRecording, isFindBagDialogOpen, setIsFindBagDialogOpen }: ChatInputProps) {
+export default function ChatInput({ input, setInput, handleSendMessage, isLoading, isRecording, toggleRecording, setIsFindBagDialogOpen }: ChatInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [bagId, setBagId] = useState('');
   const { toast } = useToast();
-  const [showBagLocation, setShowBagLocation] = useState(false);
-  const [isEmergencyDialogOpen, setIsEmergencyDialogOpen] = useState(false);
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -41,12 +36,6 @@ export default function ChatInput({ input, setInput, handleSendMessage, isLoadin
       handleSendMessage(e as any);
     }
   };
-  
-  const handleFindBagSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!bagId) return;
-    setShowBagLocation(true);
-  }
 
   const handleEmergency = () => {
     toast({
@@ -54,15 +43,6 @@ export default function ChatInput({ input, setInput, handleSendMessage, isLoadin
       description: "Your request has been sent to the command center.",
       variant: "destructive"
     });
-    setIsEmergencyDialogOpen(false);
-  };
-
-  const onFindBagOpenChange = (open: boolean) => {
-    setIsFindBagDialogOpen(open);
-    if (!open) {
-      setShowBagLocation(false);
-      setBagId('');
-    }
   };
 
   return (
@@ -110,74 +90,26 @@ export default function ChatInput({ input, setInput, handleSendMessage, isLoadin
             </div>
         </div>
         <TooltipProvider>
-            <Dialog open={isFindBagDialogOpen} onOpenChange={onFindBagOpenChange}>
-            <Tooltip>
-                <TooltipTrigger asChild>
-                <DialogTrigger asChild>
-                    <Button type="button" size="icon" variant="outline" className="text-muted-foreground hover:text-foreground" disabled={isLoading}>
-                    <Briefcase className="h-5 w-5" />
-                    </Button>
-                </DialogTrigger>
-                </TooltipTrigger>
-                <TooltipContent>
-                <p>Find my smart bag</p>
-                </TooltipContent>
-            </Tooltip>
-                <DialogContent className="sm:max-w-md">
-                {showBagLocation ? (
-                    <FindMyBag setDashboardView={() => onFindBagOpenChange(false)} />
-                ) : (
-                    <>
-                    <DialogHeader>
-                        <DialogTitle>Find Smart Bag</DialogTitle>
-                        <DialogDescription>
-                        Enter the ID of your smart bag to locate it on the factory floor.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <form onSubmit={handleFindBagSubmit}>
-                        <div className="grid gap-4 py-4">
-                        <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="bag-id" className="text-right">
-                            Bag ID
-                            </Label>
-                            <Input
-                            id="bag-id"
-                            value={bagId}
-                            onChange={(e) => setBagId(e.target.value)}
-                            className="col-span-3"
-                            placeholder="e.g., T-837"
-                            />
-                        </div>
-                        </div>
-                        <DialogFooter>
-                        <Button type="submit" disabled={!bagId}>Find</Button>
-                        </DialogFooter>
-                    </form>
-                    </>
-                )}
-                </DialogContent>
-            </Dialog>
-            <Dialog open={isEmergencyDialogOpen} onOpenChange={setIsEmergencyDialogOpen}>
-            <Tooltip>
-                <TooltipTrigger asChild>
-                    <DialogTrigger asChild>
-                    <Button type="button" size="icon" variant="destructive" className="rounded-full" disabled={isLoading}>
-                        <TriangleAlert className="h-5 w-5" />
-                    </Button>
-                    </DialogTrigger>
-                </TooltipTrigger>
-                <TooltipContent>
-                    <p>Emergency</p>
-                </TooltipContent>
-            </Tooltip>
-            <DialogContent>
-                <DialogHeader>
-                <DialogTitle className="flex items-center gap-2"><TriangleAlert className="h-6 w-6 text-destructive" /> Confirm Emergency</DialogTitle>
-                <DialogDescription>Your current location will be sent to the command center when you confirm.</DialogDescription>
-                </DialogHeader>
-                <EmergencyLocation onConfirm={handleEmergency} onCancel={() => setIsEmergencyDialogOpen(false)} />
-            </DialogContent>
-            </Dialog>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button type="button" size="icon" variant="outline" className="text-muted-foreground hover:text-foreground" disabled={isLoading} onClick={() => setIsFindBagDialogOpen(true)}>
+                <Briefcase className="h-5 w-5" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Find my smart bag</p>
+            </TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button type="button" size="icon" variant="destructive" className="rounded-full" disabled={isLoading} onClick={handleEmergency}>
+                  <TriangleAlert className="h-5 w-5" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+                <p>Emergency</p>
+            </TooltipContent>
+          </Tooltip>
         </TooltipProvider>
       </form>
        <p className="text-xs text-muted-foreground text-center">

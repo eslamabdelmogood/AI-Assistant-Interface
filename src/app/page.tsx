@@ -2,167 +2,19 @@
 import { useState } from 'react';
 import ChatPanel from '@/components/chat/chat-panel';
 import Header from '@/components/layout/header';
-import { type Equipment } from '@/lib/data';
 import { FirebaseClientProvider } from '@/firebase';
-import DashboardPanel from '@/components/dashboard/dashboard-panel';
-import { DUMMY_EQUIPMENT } from '@/lib/data';
-import { Sidebar, SidebarContent, SidebarInset, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, useSidebar } from '@/components/ui/sidebar';
-import { Wrench, User, Settings, History, HelpCircle } from 'lucide-react';
-import PilgrimView from '@/components/dashboard/pilgrim-view';
-import { cn } from '@/lib/utils';
-import { ScrollArea } from '@/components/ui/scroll-area';
 
 export type View = 'dashboard' | 'report' | 'order' | 'drone' | 'find-bag';
-export type AppView = 'maintenance' | 'pilgrim';
-
-function MainContent() {
-  const [selectedEquipment, setSelectedEquipment] = useState<Equipment | null>(DUMMY_EQUIPMENT[0]);
-  const [isPanelOpen, setIsPanelOpen] = useState(true);
-  const [appView, setAppView] = useState<AppView>('maintenance');
-  const { state: sidebarState } = useSidebar();
-
-  const isMaintenanceView = appView === 'maintenance';
-  const isSidebarExpanded = sidebarState === 'expanded';
-
-  return (
-    <div className="flex h-dvh w-full flex-col bg-background text-foreground">
-      <Header />
-      <main className="flex flex-1 overflow-hidden">
-        <Sidebar collapsible='icon'>
-            <SidebarContent>
-              <ScrollArea className="h-full">
-                <SidebarMenu>
-                    <SidebarMenuItem>
-                        <SidebarMenuButton 
-                            isActive={appView === 'maintenance'}
-                            onClick={() => setAppView('maintenance')}
-                            tooltip="Maintenance View"
-                        >
-                            <Wrench />
-                            <span>Maintenance</span>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                    <SidebarMenuItem>
-                        <SidebarMenuButton 
-                            isActive={appView === 'pilgrim'}
-                            onClick={() => setAppView('pilgrim')}
-                            tooltip="Pilgrim View"
-                        >
-                            <User />
-                            <span>Pilgrim</span>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                    <SidebarMenuItem>
-                        <SidebarMenuButton tooltip="Settings">
-                            <Settings />
-                            <span>Settings</span>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                    <SidebarMenuItem>
-                        <SidebarMenuButton tooltip="History">
-                            <History />
-                            <span>History</span>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                    <SidebarMenuItem>
-                        <SidebarMenuButton tooltip="Help">
-                            <HelpCircle />
-                            <span>Help</span>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                    <SidebarMenuItem>
-                        <SidebarMenuButton tooltip="Settings 2">
-                            <Settings />
-                            <span>Settings 2</span>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                    <SidebarMenuItem>
-                        <SidebarMenuButton tooltip="History 2">
-                            <History />
-                            <span>History 2</span>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                    <SidebarMenuItem>
-                        <SidebarMenuButton tooltip="Help 2">
-                            <HelpCircle />
-                            <span>Help 2</span>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                    <SidebarMenuItem>
-                        <SidebarMenuButton tooltip="Settings 3">
-                            <Settings />
-                            <span>Settings 3</span>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                    <SidebarMenuItem>
-                        <SidebarMenuButton tooltip="History 3">
-                            <History />
-                            <span>History 3</span>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                    <SidebarMenuItem>
-                        <SidebarMenuButton tooltip="Help 3">
-                            <HelpCircle />
-                            <span>Help 3</span>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                    <SidebarMenuItem>
-                        <SidebarMenuButton tooltip="Settings 4">
-                            <Settings />
-                            <span>Settings 4</span>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                    <SidebarMenuItem>
-                        <SidebarMenuButton tooltip="History 4">
-                            <History />
-                            <span>History 4</span>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                    <SidebarMenuItem>
-                        <SidebarMenuButton tooltip="Help 4">
-                            <HelpCircle />
-                            <span>Help 4</span>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                </SidebarMenu>
-              </ScrollArea>
-            </SidebarContent>
-        </Sidebar>
-        <SidebarInset className="flex-1 overflow-auto">
-          <div className="flex h-full">
-            <div 
-              className={cn(
-                "h-full transition-all duration-300 ease-in-out",
-                isMaintenanceView ? 'w-full lg:w-2/5 xl:w-1/3 2xl:w-1/4' : 'w-full'
-              )}
-            >
-              <ChatPanel
-                selectedEquipment={selectedEquipment}
-                setSelectedEquipment={setSelectedEquipment}
-                isPanelOpen={isPanelOpen}
-                setIsPanelOpen={setIsPanelOpen}
-              />
-            </div>
-            {isMaintenanceView && (
-              <DashboardPanel 
-                equipment={selectedEquipment} 
-                isPanelOpen={isPanelOpen}
-              />
-            )}
-          </div>
-        </SidebarInset>
-      </main>
-    </div>
-  );
-}
-
 
 export default function Home() {
   return (
     <FirebaseClientProvider>
-      <SidebarProvider>
-        <MainContent />
-      </SidebarProvider>
+      <div className="flex h-dvh w-full flex-col bg-background text-foreground">
+        <Header />
+        <main className="flex flex-1 overflow-hidden">
+          <ChatPanel />
+        </main>
+      </div>
     </FirebaseClientProvider>
   );
 }
