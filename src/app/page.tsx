@@ -7,9 +7,10 @@ import { FirebaseClientProvider } from '@/firebase';
 import DashboardPanel from '@/components/dashboard/dashboard-panel';
 import { DUMMY_EQUIPMENT } from '@/lib/data';
 import { Sidebar, SidebarContent, SidebarInset, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, useSidebar } from '@/components/ui/sidebar';
-import { Wrench, User } from 'lucide-react';
+import { Wrench, User, Settings, History, HelpCircle } from 'lucide-react';
 import PilgrimView from '@/components/dashboard/pilgrim-view';
 import { cn } from '@/lib/utils';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 export type View = 'dashboard' | 'report' | 'order' | 'drone' | 'find-bag';
 export type AppView = 'maintenance' | 'pilgrim';
@@ -29,6 +30,7 @@ function MainContent() {
       <main className="flex flex-1 overflow-hidden">
         <Sidebar collapsible='icon'>
             <SidebarContent>
+              <ScrollArea className="h-full">
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton 
@@ -50,7 +52,80 @@ function MainContent() {
                             <span>Pilgrim</span>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton tooltip="Settings">
+                            <Settings />
+                            <span>Settings</span>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton tooltip="History">
+                            <History />
+                            <span>History</span>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton tooltip="Help">
+                            <HelpCircle />
+                            <span>Help</span>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton tooltip="Settings 2">
+                            <Settings />
+                            <span>Settings 2</span>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton tooltip="History 2">
+                            <History />
+                            <span>History 2</span>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton tooltip="Help 2">
+                            <HelpCircle />
+                            <span>Help 2</span>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton tooltip="Settings 3">
+                            <Settings />
+                            <span>Settings 3</span>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton tooltip="History 3">
+                            <History />
+                            <span>History 3</span>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton tooltip="Help 3">
+                            <HelpCircle />
+                            <span>Help 3</span>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton tooltip="Settings 4">
+                            <Settings />
+                            <span>Settings 4</span>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton tooltip="History 4">
+                            <History />
+                            <span>History 4</span>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton tooltip="Help 4">
+                            <HelpCircle />
+                            <span>Help 4</span>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
                 </SidebarMenu>
+              </ScrollArea>
             </SidebarContent>
         </Sidebar>
         <SidebarInset className="flex-1 overflow-auto">
