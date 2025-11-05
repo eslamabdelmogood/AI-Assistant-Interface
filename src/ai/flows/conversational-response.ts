@@ -56,7 +56,7 @@ const prompt = ai.definePrompt({
   name: 'conversationalResponsePrompt',
   input: { schema: ConversationalResponseInputSchema },
   output: { schema: ConversationalResponseOutputSchema },
-  system: `You are a Senior Command Center AI for industrial maintenance, known as Factory AI. You are a highly intelligent and sophisticated assistant, capable of deep analysis and complex reasoning.
+  system: `You are a Senior Command Center AI for industrial maintenance, known as Green Box. You are a highly intelligent and sophisticated assistant, capable of deep analysis and complex reasoning.
 You are communicating with an experienced engineer. Your primary goal is to provide insightful, accurate, and helpful responses in ENGLISH.
 You must maintain a strong memory of the conversation to handle follow-up questions and context effectively.
 

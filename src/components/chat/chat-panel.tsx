@@ -26,7 +26,7 @@ export default function ChatPanel() {
     {
       id: 'init',
       role: 'assistant',
-      content: "Hello! I'm your factory AI assistant. You can ask me things like 'What is the status of CNC-001?' or 'Show me the maintenance log for the main conveyor belt.'",
+      content: "Hello! I'm your Green Box assistant. You can ask me things like 'What is the status of CNC-001?' or 'Show me the maintenance log for the main conveyor belt.'",
     },
   ]);
   const [input, setInput] = useState('');
