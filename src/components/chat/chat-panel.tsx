@@ -130,21 +130,20 @@ export default function ChatPanel() {
         throw new Error(res.error || 'Failed to get a response.');
       }
       
-      const { response, languageCode, action } = res.data;
+      const { response } = res.data;
+      
+      // Simple text-based commands for special actions as a fallback
+      if (userInput.toLowerCase().includes('find my bag')) {
+        setIsFindBagDialogOpen(true);
+      } else if (userInput.toLowerCase().includes('emergency')) {
+        setIsEmergencyConfirmOpen(true);
+      }
 
       if (response) {
         const assistantMessage = addMessage('assistant', response);
-        if (languageCode) {
-          await handleTextToSpeech(response, languageCode, assistantMessage.id);
-        }
-      }
-      
-      if (action === 'find-bag') {
-        setIsFindBagDialogOpen(true);
-        if (!response) {
-            const findBagMessage = addMessage('assistant', "I can help with that. Please enter the ID of the bag you are looking for in the dialog.");
-            await handleTextToSpeech("I can help with that. Please enter the ID of the bag you are looking for in the dialog.", 'en-US', findBagMessage.id);
-        }
+        // We don't have a reliable language code anymore, so we default to English for TTS
+        // or disable it if we can't guarantee the language. For now, let's default.
+        await handleTextToSpeech(response, 'en-US', assistantMessage.id);
       }
       
     } catch (error) {
