@@ -8,9 +8,11 @@ import { MaintenanceReport, OrderParts, DroneDispatchConfirmation, VisualExplana
 import type { View } from '@/app/page';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection } from 'firebase/firestore';
+import { DUMMY_EQUIPMENT, type Equipment } from '@/lib/data';
+import { PanelLeft } from 'lucide-react';
+import { Button } from '../ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 
-// This imports the Equipment type from the backend definition.
-import type { Equipment } from '@/../docs/backend-schema';
 
 export type Message = {
   id: string;
@@ -22,6 +24,8 @@ export type Message = {
 type ChatPanelProps = {
   selectedEquipment: Equipment | null;
   setSelectedEquipment: Dispatch<SetStateAction<Equipment | null>>;
+  isPanelOpen: boolean;
+  setIsPanelOpen: Dispatch<SetStateAction<boolean>>;
 };
 
 declare global {
@@ -31,7 +35,7 @@ declare global {
   }
 }
 
-export default function ChatPanel({ selectedEquipment, setSelectedEquipment }: ChatPanelProps) {
+export default function ChatPanel({ selectedEquipment, setSelectedEquipment, isPanelOpen, setIsPanelOpen }: ChatPanelProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 'init',
@@ -50,9 +54,12 @@ export default function ChatPanel({ selectedEquipment, setSelectedEquipment }: C
   const [isFindBagDialogOpen, setIsFindBagDialogOpen] = useState(false);
 
 
-  const firestore = useFirestore();
-  const equipmentQuery = useMemoFirebase(() => firestore ? collection(firestore, 'equipment') : null, [firestore]);
-  const { data: equipments, isLoading: isLoadingEquipments } = useCollection<Equipment>(equipmentQuery);
+  // const firestore = useFirestore();
+  // const equipmentQuery = useMemoFirebase(() => firestore ? collection(firestore, 'equipment') : null, [firestore]);
+  // const { data: equipments, isLoading: isLoadingEquipments } = useCollection<Equipment>(equipmentQuery);
+  const equipments = DUMMY_EQUIPMENT;
+  const isLoadingEquipments = false;
+
 
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -214,10 +221,11 @@ export default function ChatPanel({ selectedEquipment, setSelectedEquipment }: C
       
       let equipmentToUse = selectedEquipment;
       if (targetEquipment && equipments) {
-        const foundEquipment = equipments.find(e => e.id === targetEquipment.id || e.name === targetEquipment.name);
+        const foundEquipment = equipments.find(e => e.id.toLowerCase() === targetEquipment.id.toLowerCase() || e.name.toLowerCase() === targetEquipment.name.toLowerCase());
         if(foundEquipment) {
           equipmentToUse = foundEquipment;
           setSelectedEquipment(foundEquipment);
+          if (!isPanelOpen) setIsPanelOpen(true);
         }
       }
 
@@ -227,9 +235,9 @@ export default function ChatPanel({ selectedEquipment, setSelectedEquipment }: C
         switch (action) {
           case 'status':
             if(equipmentToUse.status) {
-              const statusMessage = `${equipmentToUse.name} is currently ${equipmentToUse.status}.`;
+              const statusMessage = `${equipmentToUse.name} is currently ${equipmentToUse.status}. I've pulled up its details for you.`;
               addMessage('assistant', statusMessage);
-              addMessage('assistant', <ActionButtons equipment={equipmentToUse} onAction={handleAction} />);
+              // The dashboard will show the details, no need for action buttons here
             } else {
               addMessage('assistant', `I found ${equipmentToUse.name}, but I don't have live status data for it.`);
             }
@@ -261,7 +269,22 @@ export default function ChatPanel({ selectedEquipment, setSelectedEquipment }: C
   };
 
   return (
-    <div className="flex h-full flex-col bg-card">
+    <div className="flex h-full flex-col bg-card border-r">
+       <div className="flex items-center justify-between p-4 border-b">
+         <h2 className="text-xl font-semibold">Conversational AI</h2>
+         <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" onClick={() => setIsPanelOpen(!isPanelOpen)}>
+                    <PanelLeft className="h-5 w-5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                  <p>{isPanelOpen ? "Hide" : "Show"} Dashboard</p>
+              </TooltipContent>
+            </Tooltip>
+         </TooltipProvider>
+       </div>
       <ChatMessages messages={messages} isLoading={isLoading || isLoadingEquipments} />
       <ChatInput 
         input={input} 

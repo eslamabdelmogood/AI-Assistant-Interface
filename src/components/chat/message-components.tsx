@@ -6,35 +6,37 @@ import { Button } from '../ui/button';
 import type { View } from '@/app/page';
 import Image from 'next/image';
 import type { VisualExplanationOutput } from '@/ai/schemas/visual-explanation-schemas';
-import type { Equipment, MaintenanceEvent } from '@/../docs/backend-schema';
+import type { Equipment } from '@/lib/data';
 import { Bot, FileText, Wrench } from 'lucide-react';
 
 export function MaintenanceReport({ equipment }: { equipment: Equipment }) {
   return (
     <div className="space-y-2">
       <p className="font-semibold">Maintenance Report for {equipment.name}</p>
-      {/* This assumes maintenanceLog is part of the equipment data from Firestore */}
-      {/* <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Date</TableHead>
-            <TableHead>Description</TableHead>
-            <TableHead>Status</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {equipment.maintenanceLog.map((log) => (
-            <TableRow key={log.id}>
-              <TableCell>{log.date}</TableCell>
-              <TableCell>{log.description}</TableCell>
-              <TableCell>
-                <Badge variant={log.status === 'Completed' ? 'default' : 'secondary'}>{log.status}</Badge>
-              </TableCell>
+      {equipment.maintenanceLog.length > 0 ? (
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Date</TableHead>
+              <TableHead>Description</TableHead>
+              <TableHead>Status</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table> */}
-      <p className="text-sm text-muted-foreground">Maintenance logs would be displayed here.</p>
+          </TableHeader>
+          <TableBody>
+            {equipment.maintenanceLog.map((log) => (
+              <TableRow key={log.id}>
+                <TableCell>{log.date}</TableCell>
+                <TableCell>{log.description}</TableCell>
+                <TableCell>
+                  <Badge variant={log.status === 'Completed' ? 'default' : 'secondary'}>{log.status}</Badge>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      ) : (
+        <p className="text-sm text-muted-foreground">No maintenance logs found for this equipment.</p>
+      )}
     </div>
   );
 }

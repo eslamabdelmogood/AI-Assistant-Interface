@@ -7,10 +7,10 @@ import { cn } from '@/lib/utils';
 export default function EquipmentStatusCard({ equipment }: { equipment: Equipment }) {
   const getStatusColor = () => {
     switch (equipment.status) {
-      case 'Operational': return 'bg-chart-1';
-      case 'Warning': return 'bg-chart-2';
-      case 'Offline': return 'bg-destructive';
-      default: return 'bg-muted-foreground';
+      case 'Operational': return 'bg-green-500';
+      case 'Warning': return 'bg-yellow-500';
+      case 'Offline': return 'bg-red-500';
+      default: return 'bg-gray-500';
     }
   };
 

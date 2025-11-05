@@ -27,8 +27,10 @@ export default function MaintenanceLog({ equipment }: { equipment: Equipment }) 
                   <TableCell>{log.date}</TableCell>
                   <TableCell className="font-medium">{log.description}</TableCell>
                   <TableCell className="text-right">
-                    <Badge variant={log.status === 'Completed' ? 'default' : 'secondary'}
-                      className={log.status === 'Completed' ? 'bg-chart-1 text-white' : ''}>
+                    <Badge 
+                      variant={log.status === 'Completed' ? 'default' : 'secondary'}
+                      className={log.status === 'Completed' ? 'bg-green-500 text-white' : ''}
+                    >
                       {log.status}
                     </Badge>
                   </TableCell>
